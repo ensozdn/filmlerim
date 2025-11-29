@@ -10,7 +10,21 @@ interface Film {
   title: string;
   description: string;
   poster_url: string;
+  genres?: string[];
 }
+
+const AVAILABLE_GENRES = [
+  'Aksiyon', 'Macera', 'Animasyon', 'Komedi', 'Suç', 'Belgesel',
+  'Drama', 'Aile', 'Fantastik', 'Tarih', 'Korku', 'Müzik',
+  'Gizem', 'Romantik', 'Bilim-Kurgu', 'Gerilim', 'Savaş', 'Western'
+];
+
+const TMDB_GENRE_MAP: Record<number, string> = {
+  28: 'Aksiyon', 12: 'Macera', 16: 'Animasyon', 35: 'Komedi', 80: 'Suç',
+  99: 'Belgesel', 18: 'Drama', 10751: 'Aile', 14: 'Fantastik', 36: 'Tarih',
+  27: 'Korku', 10402: 'Müzik', 9648: 'Gizem', 10749: 'Romantik',
+  878: 'Bilim-Kurgu', 10770: 'TV Film', 53: 'Gerilim', 10752: 'Savaş', 37: 'Western'
+};
 
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null);
@@ -19,10 +33,16 @@ export default function AdminPage() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [posterUrl, setPosterUrl] = useState('');
+  const [genres, setGenres] = useState<string[]>([]);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
   const router = useRouter();
+
+  // NOT: Buraya kendi TMDB API anahtarınızı yapıştırın.
+  // Almak için: https://www.themoviedb.org/settings/api
+  const TMDB_API_KEY = 'YOUR_TMDB_API_KEY';
 
   useEffect(() => {
     const getUser = async () => {
@@ -46,6 +66,51 @@ export default function AdminPage() {
   const loadFilms = async () => {
     const { data } = await supabase.from('films').select('*');
     setFilms(data || []);
+  };
+
+  const handleSearchFilm = async () => {
+    if (!title.trim()) {
+      setError('Lütfen önce film başlığını yazın');
+      return;
+    }
+
+    if (TMDB_API_KEY === 'YOUR_TMDB_API_KEY') {
+      setError('Lütfen kod içindeki TMDB_API_KEY alanına geçerli bir API anahtarı girin.');
+      return;
+    }
+
+    setSearchLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=tr-TR`
+      );
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        const movie = data.results[0];
+        setTitle(movie.title);
+        setDescription(movie.overview);
+        if (movie.poster_path) {
+          setPosterUrl(`https://image.tmdb.org/t/p/w500${movie.poster_path}`);
+        }
+        // Map TMDB genre IDs to Turkish genre names
+        if (movie.genre_ids && Array.isArray(movie.genre_ids)) {
+          const mappedGenres = movie.genre_ids
+            .map((id: number) => TMDB_GENRE_MAP[id])
+            .filter((genre: string | undefined): genre is string => genre !== undefined);
+          setGenres(mappedGenres);
+        }
+        setSuccess('Film bilgileri TMDB\'den çekildi!');
+      } else {
+        setError('Film bulunamadı.');
+      }
+    } catch (err) {
+      setError('TMDB bağlantı hatası.');
+    } finally {
+      setSearchLoading(false);
+    }
   };
 
   const validateForm = (): boolean => {
@@ -98,6 +163,7 @@ export default function AdminPage() {
             title: title.trim(),
             description: description.trim(),
             poster_url: posterUrl.trim() || null,
+            genres: genres,
             updated_at: new Date().toISOString(),
           })
           .eq('id', editingId);
@@ -116,6 +182,7 @@ export default function AdminPage() {
             title: title.trim(),
             description: description.trim(),
             poster_url: posterUrl.trim() || null,
+            genres: genres,
           },
         ]);
 
@@ -136,6 +203,7 @@ export default function AdminPage() {
     setTitle(film.title);
     setDescription(film.description);
     setPosterUrl(film.poster_url || '');
+    setGenres(film.genres || []);
     setEditingId(film.id);
   };
 
@@ -160,6 +228,7 @@ export default function AdminPage() {
     setTitle('');
     setDescription('');
     setPosterUrl('');
+    setGenres([]);
     setEditingId(null);
   };
 
@@ -245,13 +314,24 @@ export default function AdminPage() {
                   <label className="block text-gray-300 text-sm font-medium mb-2">
                     Başlık
                   </label>
-                  <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
-                    placeholder="Film başlığı"
-                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      placeholder="Film başlığı"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSearchFilm}
+                      disabled={searchLoading}
+                      className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg transition-all disabled:opacity-50"
+                      title="TMDB'den Bilgileri Çek"
+                    >
+                      {searchLoading ? '...' : '🔍'}
+                    </button>
+                  </div>
                 </div>
 
                 <div>
@@ -278,6 +358,38 @@ export default function AdminPage() {
                     className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                     placeholder="https://..."
                   />
+                </div>
+
+                <div>
+                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                    T\u00fcrler
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {AVAILABLE_GENRES.map((genre) => (
+                      <button
+                        key={genre}
+                        type="button"
+                        onClick={() => {
+                          if (genres.includes(genre)) {
+                            setGenres(genres.filter(g => g !== genre));
+                          } else {
+                            setGenres([...genres, genre]);
+                          }
+                        }}
+                        className={`px-3 py-1 rounded-full text-sm font-medium transition-all ${genres.includes(genre)
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-700/50 text-gray-400 hover:bg-gray-600/50'
+                          }`}
+                      >
+                        {genre}
+                      </button>
+                    ))}
+                  </div>
+                  {genres.length > 0 && (
+                    <p className="text-xs text-gray-500 mt-2">
+                      Se\u00e7ili: {genres.join(', ')}
+                    </p>
+                  )}
                 </div>
 
                 {error && (

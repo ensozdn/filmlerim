@@ -14,6 +14,7 @@ interface Film {
   title: string;
   description: string;
   poster_url: string;
+  genres?: string[];
 }
 
 const FILMS_PER_PAGE = 12;
@@ -25,14 +26,17 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedGenre, setSelectedGenre] = useState<string>('');
   const [sortBy, setSortBy] = useState<'title' | 'newest'>('title');
   const router = useRouter();
 
   // Arama ve filtreleme
-  const filteredFilms = films.filter((film) =>
-    film.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    film.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredFilms = films.filter((film) => {
+    const matchesSearch = film.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      film.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesGenre = !selectedGenre || (film.genres && film.genres.includes(selectedGenre));
+    return matchesSearch && matchesGenre;
+  });
 
   // Sıralama
   const sortedFilms = [...filteredFilms].sort((a, b) => {
@@ -68,22 +72,38 @@ export default function DashboardPage() {
 
       // Admin kontrolü
       try {
-        const { data: profile } = await supabase
+        const { data: profileData } = await supabase
           .from('profiles')
           .select('role')
           .eq('id', user.id)
           .single();
 
-        if (profile?.role === 'admin') {
-          setIsAdmin(true);
-        }
+        setIsAdmin(profileData?.role === 'admin');
       } catch (err) {
         console.error('Profile fetch error:', err);
       }
 
-      // Filmleri getir
-      const { data: filmsData } = await supabase.from('films').select('*');
-      setFilms(filmsData || []);
+      // Fetch all films with genres and comments
+      const { data: filmsData } = await supabase
+        .from('films')
+        .select('*, comments(rating)')
+        .order('title');
+
+      // Calculate average ratings
+      const filmsWithRatings = (filmsData || []).map((film: any) => {
+        const ratings = film.comments?.map((c: any) => c.rating) || [];
+        const avgRating = ratings.length > 0
+          ? ratings.reduce((sum: number, r: number) => sum + r, 0) / ratings.length
+          : 0;
+
+        return {
+          ...film,
+          average_rating: avgRating,
+          comment_count: ratings.length
+        };
+      });
+
+      setFilms(filmsWithRatings);
       setLoading(false);
     };
 
@@ -107,18 +127,28 @@ export default function DashboardPage() {
     );
   }
 
-  // Pick a random film for Hero Slider (or the first one)
-  const heroFilm = films.length > 0 ? films[Math.floor(Math.random() * films.length)] : null;
-
   // Mock trending films (just shuffling for now)
   const trendingFilms = [...films].sort(() => 0.5 - Math.random()).slice(0, 10);
 
   return (
     <div className="min-h-screen bg-[#0a0e27] text-white selection:bg-blue-500/30">
-      <DashboardHeader userEmail={user?.email} isAdmin={isAdmin} />
+      <DashboardHeader
+        userEmail={user?.email}
+        isAdmin={isAdmin}
+        searchQuery={searchQuery}
+        onSearch={(query) => {
+          setSearchQuery(query);
+          setCurrentPage(1);
+        }}
+        films={films}
+        onGenreSelect={(genre) => {
+          setSelectedGenre(genre);
+          setCurrentPage(1);
+        }}
+      />
 
       {/* Hero Slider Section */}
-      {heroFilm && <HeroSlider film={heroFilm} />}
+      {films.length > 0 && <HeroSlider films={films.slice(0, 5)} />}
 
       <main className="max-w-7xl mx-auto p-6 lg:p-8 space-y-12">
 
@@ -140,22 +170,42 @@ export default function DashboardPage() {
             </div>
 
             <div className="flex gap-3 w-full md:w-auto">
-              <div className="relative flex-1 md:w-64 group">
-                <input
-                  type="text"
-                  placeholder="Film ara..."
-                  value={searchQuery}
+              {/* Genre Filter */}
+              <div className="relative">
+                <select
+                  value={selectedGenre}
                   onChange={(e) => {
-                    setSearchQuery(e.target.value);
+                    setSelectedGenre(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="w-full px-4 py-2.5 pl-10 bg-[#1a1f35] border border-white/10 rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all group-hover:bg-[#1f2937]"
-                />
-                <svg className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  className="appearance-none px-4 py-2.5 pr-8 bg-[#1a1f35] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer hover:bg-[#1f2937]"
+                >
+                  <option value="">Tüm Türler</option>
+                  <option value="Aksiyon">Aksiyon</option>
+                  <option value="Macera">Macera</option>
+                  <option value="Animasyon">Animasyon</option>
+                  <option value="Komedi">Komedi</option>
+                  <option value="Suç">Suç</option>
+                  <option value="Belgesel">Belgesel</option>
+                  <option value="Drama">Drama</option>
+                  <option value="Aile">Aile</option>
+                  <option value="Fantastik">Fantastik</option>
+                  <option value="Tarih">Tarih</option>
+                  <option value="Korku">Korku</option>
+                  <option value="Müzik">Müzik</option>
+                  <option value="Gizem">Gizem</option>
+                  <option value="Romantik">Romantik</option>
+                  <option value="Bilim-Kurgu">Bilim-Kurgu</option>
+                  <option value="Gerilim">Gerilim</option>
+                  <option value="Savaş">Savaş</option>
+                  <option value="Western">Western</option>
+                </select>
+                <svg className="w-3 h-3 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                 </svg>
               </div>
 
+              {/* Sort */}
               <div className="relative">
                 <select
                   value={sortBy}
@@ -243,6 +293,6 @@ export default function DashboardPage() {
           )}
         </section>
       </main>
-    </div>
+    </div >
   );
 }

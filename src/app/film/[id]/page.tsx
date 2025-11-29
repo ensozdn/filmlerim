@@ -30,6 +30,40 @@ interface Like {
   user_id: string;
 }
 
+interface Actor {
+  name: string;
+  role: string;
+  image_url: string;
+}
+
+const MOCK_CAST: Record<string, Actor[]> = {
+  'Inception': [
+    { name: 'Leonardo DiCaprio', role: 'Cobb', image_url: 'https://image.tmdb.org/t/p/w200/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg' },
+    { name: 'Joseph Gordon-Levitt', role: 'Arthur', image_url: 'https://image.tmdb.org/t/p/w200/z2oXn0ASbfUTUR9fCsKhCTjY67T.jpg' },
+    { name: 'Elliot Page', role: 'Ariadne', image_url: 'https://image.tmdb.org/t/p/w200/tp157uL7gV52I77XAgkQdGUM8q6.jpg' },
+    { name: 'Tom Hardy', role: 'Eames', image_url: 'https://image.tmdb.org/t/p/w200/yVgfW4vQUIDYBTs9ViScj3n9cy.jpg' },
+    { name: 'Cillian Murphy', role: 'Robert Fischer', image_url: 'https://image.tmdb.org/t/p/w200/2l91eErDNeMflSeA85F3zw0Q90O.jpg' },
+  ],
+  'Interstellar': [
+    { name: 'Matthew McConaughey', role: 'Cooper', image_url: 'https://image.tmdb.org/t/p/w200/sY2m2EOzmzfe6hE7538NK80Jack.jpg' },
+    { name: 'Anne Hathaway', role: 'Brand', image_url: 'https://image.tmdb.org/t/p/w200/tLelKoPNiyJCSEtQTz1ZFkjCZ7d.jpg' },
+    { name: 'Jessica Chastain', role: 'Murph', image_url: 'https://image.tmdb.org/t/p/w200/adpp9yWdYx1XjY6b6s4g7qZ8ly.jpg' },
+    { name: 'Michael Caine', role: 'Prof. Brand', image_url: 'https://image.tmdb.org/t/p/w200/klNx4Uqkr6CpzgTflOxdFnh3Xgu.jpg' },
+  ],
+  'The Dark Knight': [
+    { name: 'Christian Bale', role: 'Bruce Wayne / Batman', image_url: 'https://image.tmdb.org/t/p/w200/b7fTC9OTJ6LfSaS570up8xQuyMY.jpg' },
+    { name: 'Heath Ledger', role: 'Joker', image_url: 'https://image.tmdb.org/t/p/w200/5Y9Hn3nlb9gxD2x0uBvjWv0rKx.jpg' },
+    { name: 'Michael Caine', role: 'Alfred', image_url: 'https://image.tmdb.org/t/p/w200/klNx4Uqkr6CpzgTflOxdFnh3Xgu.jpg' },
+    { name: 'Gary Oldman', role: 'Gordon', image_url: 'https://image.tmdb.org/t/p/w200/2v9FVVBUrrkW2m3QOcYkuhqaOe1.jpg' },
+  ],
+  'Default': [
+    { name: 'Brad Pitt', role: 'Lead Actor', image_url: 'https://image.tmdb.org/t/p/w200/cckcYc2v0yh1tc9QjRelptcOBko.jpg' },
+    { name: 'Scarlett Johansson', role: 'Lead Actress', image_url: 'https://image.tmdb.org/t/p/w200/6NsMbJXRlDGC7yxlz4CiUhAWQQ.jpg' },
+    { name: 'Morgan Freeman', role: 'Supporting Actor', image_url: 'https://image.tmdb.org/t/p/w200/oIciQWr8VwKoR8TmAw1owaiZFyb.jpg' },
+    { name: 'Tom Hanks', role: 'Director', image_url: 'https://image.tmdb.org/t/p/w200/xndWFsBlClOJFRdhSt4NBwiPq2o.jpg' },
+  ]
+};
+
 export default function FilmDetailPage() {
   const [film, setFilm] = useState<Film | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
@@ -38,6 +72,7 @@ export default function FilmDetailPage() {
   const [commentText, setCommentText] = useState('');
   const [rating, setRating] = useState(5);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [watchlistStatus, setWatchlistStatus] = useState<'to_watch' | 'watched' | null>(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const router = useRouter();
@@ -90,6 +125,16 @@ export default function FilmDetailPage() {
         .single();
 
       setIsFavorite(!!favoriteData);
+
+      // Check watchlist status
+      const { data: watchlistData } = await supabase
+        .from('watchlist')
+        .select('status')
+        .eq('film_id', filmId)
+        .eq('user_id', user.id)
+        .single();
+
+      setWatchlistStatus(watchlistData?.status || null);
       setLoading(false);
     };
 
@@ -173,6 +218,38 @@ export default function FilmDetailPage() {
       }
 
       setIsFavorite(!isFavorite);
+    } catch (err) {
+      setError('Bir hata oluştu');
+    }
+  };
+
+  const toggleWatchlist = async (status: 'to_watch' | 'watched') => {
+    try {
+      if (watchlistStatus === status) {
+        // Remove from watchlist if same status clicked
+        await supabase
+          .from('watchlist')
+          .delete()
+          .eq('film_id', filmId)
+          .eq('user_id', user.id);
+        setWatchlistStatus(null);
+      } else {
+        // Upsert: insert or update
+        const { error } = await supabase
+          .from('watchlist')
+          .upsert({
+            user_id: user.id,
+            film_id: filmId,
+            status: status,
+            watched_date: status === 'watched' ? new Date().toISOString() : null,
+          }, {
+            onConflict: 'user_id,film_id'
+          });
+
+        if (!error) {
+          setWatchlistStatus(status);
+        }
+      }
     } catch (err) {
       setError('Bir hata oluştu');
     }
@@ -315,17 +392,61 @@ export default function FilmDetailPage() {
                 </span>
               </div>
               <p className="text-gray-300 mb-6 leading-relaxed">{film.description}</p>
-              <button
-                onClick={toggleFavorite}
-                className={`${
-                  isFavorite
-                    ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 shadow-lg shadow-red-500/30'
-                    : 'bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-500 hover:to-pink-600 shadow-lg shadow-pink-500/30'
-                } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
-              >
-                {isFavorite ? '❤️ Favorilerden Çıkar' : '🤍 Favorilere Ekle'}
-              </button>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={toggleFavorite}
+                  className={`${isFavorite
+                      ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 shadow-lg shadow-red-500/30'
+                      : 'bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-500 hover:to-pink-600 shadow-lg shadow-pink-500/30'
+                    } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
+                >
+                  {isFavorite ? '❤️ Favorilerden Çıkar' : '🤍 Favorilere Ekle'}
+                </button>
+
+                <button
+                  onClick={() => toggleWatchlist('watched')}
+                  className={`${watchlistStatus === 'watched'
+                      ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 shadow-lg shadow-green-500/30'
+                      : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 shadow-lg shadow-gray-500/30'
+                    } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
+                >
+                  {watchlistStatus === 'watched' ? '✅ İzledim' : '👁️ İzledim Olarak İşaretle'}
+                </button>
+
+                <button
+                  onClick={() => toggleWatchlist('to_watch')}
+                  className={`${watchlistStatus === 'to_watch'
+                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 shadow-lg shadow-blue-500/30'
+                      : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 shadow-lg shadow-gray-500/30'
+                    } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
+                >
+                  {watchlistStatus === 'to_watch' ? '📌 İzleme Listemde' : '➕ İzleyeceğim'}
+                </button>
+              </div>
             </div>
+          </div>
+        </div>
+
+        {/* Cast Section */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <span className="w-1 h-6 bg-blue-500 rounded-full"></span>
+            Oyuncular
+          </h2>
+          <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide snap-x">
+            {(MOCK_CAST[film.title] || MOCK_CAST['Default']).map((actor, index) => (
+              <div key={index} className="min-w-[140px] snap-start group">
+                <div className="w-32 h-32 md:w-40 md:h-40 mb-3 overflow-hidden rounded-full border-2 border-white/10 group-hover:border-blue-500/50 transition-all shadow-lg">
+                  <img
+                    src={actor.image_url}
+                    alt={actor.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+                <h3 className="text-white font-medium text-center truncate px-1 group-hover:text-blue-400 transition-colors">{actor.name}</h3>
+                <p className="text-gray-500 text-xs text-center truncate px-1">{actor.role}</p>
+              </div>
+            ))}
           </div>
         </div>
 
@@ -428,11 +549,10 @@ export default function FilmDetailPage() {
                     <p className="text-gray-300 mb-4 leading-relaxed">{comment.comment_text}</p>
                     <button
                       onClick={() => toggleLike(comment.id)}
-                      className={`text-sm font-semibold transition-all duration-300 px-3 py-1 rounded-lg ${
-                        comment.likes?.some((like) => like.user_id === user?.id)
-                          ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                          : 'bg-gray-700/30 text-gray-400 hover:bg-gray-700/50 hover:text-red-400'
-                      }`}
+                      className={`text-sm font-semibold transition-all duration-300 px-3 py-1 rounded-lg ${comment.likes?.some((like) => like.user_id === user?.id)
+                        ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
+                        : 'bg-gray-700/30 text-gray-400 hover:bg-gray-700/50 hover:text-red-400'
+                        }`}
                     >
                       👍 {comment.likes?.length || 0}
                     </button>

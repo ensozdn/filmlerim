@@ -3,26 +3,37 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
-import ThemeToggle from '@/components/ThemeToggle';
+import DashboardHeader from '@/components/DashboardHeader';
+import FilmCard from '@/components/FilmCard';
+
+interface Film {
+  id: number;
+  title: string;
+  description: string;
+  poster_url: string;
+}
 
 interface UserStats {
-  favoriteCount: number;
-  commentCount: number;
+  totalFavorites: number;
+  totalComments: number;
   averageRating: number;
 }
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [favorites, setFavorites] = useState<Film[]>([]);
   const [stats, setStats] = useState<UserStats>({
-    favoriteCount: 0,
-    commentCount: 0,
+    totalFavorites: 0,
+    totalComments: 0,
     averageRating: 0,
   });
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const loadUserData = async () => {
+    const loadProfile = async () => {
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -34,171 +45,174 @@ export default function ProfilePage() {
 
       setUser(user);
 
-      // Favorileri say
-      const { data: favorites } = await supabase
+      // Get profile
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+
+      setProfile(profileData);
+      setIsAdmin(profileData?.role === 'admin');
+
+      // Get favorites
+      const { data: favoritesData } = await supabase
         .from('favorites')
-        .select('id')
+        .select('films(*)')
         .eq('user_id', user.id);
 
-      // Yorumları say
-      const { data: comments } = await supabase
+      const films = favoritesData?.map((fav: any) => fav.films) || [];
+      setFavorites(films);
+
+      // Get comments count and average rating
+      const { data: commentsData } = await supabase
         .from('comments')
         .select('rating')
         .eq('user_id', user.id);
 
-      const avgRating =
-        comments && comments.length > 0
-          ? (comments.reduce((sum, c) => sum + c.rating, 0) / comments.length).toFixed(1)
+      const totalComments = commentsData?.length || 0;
+      const averageRating =
+        totalComments > 0
+          ? commentsData!.reduce((sum, c) => sum + c.rating, 0) / totalComments
           : 0;
 
       setStats({
-        favoriteCount: favorites?.length || 0,
-        commentCount: comments?.length || 0,
-        averageRating: Number(avgRating),
+        totalFavorites: films.length,
+        totalComments,
+        averageRating: parseFloat(averageRating.toFixed(1)),
       });
 
       setLoading(false);
     };
 
-    loadUserData();
+    loadProfile();
   }, [router]);
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/login');
-  };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        <header className="bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700 p-6 shadow-xl">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <div className="skeleton w-48 h-10"></div>
-            <div className="flex gap-4">
-              <div className="skeleton w-32 h-10"></div>
-              <div className="skeleton w-32 h-10"></div>
-            </div>
-          </div>
-        </header>
+      <div className="min-h-screen bg-[#0a0e27]">
+        <div className="h-20 border-b border-white/5 bg-[#0a0e27]/80 backdrop-blur-xl"></div>
         <main className="max-w-7xl mx-auto p-6">
-          <div className="skeleton w-full h-64 rounded-2xl"></div>
+          <div className="skeleton w-48 h-8 mb-8 bg-white/5"></div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="skeleton h-32 bg-white/5 rounded-2xl"></div>
+            ))}
+          </div>
         </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700 p-6 shadow-xl">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="text-blue-400 hover:text-blue-300 font-semibold transition-colors flex items-center gap-2"
-          >
-            ← Geri
-          </button>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            Filmlerim.iO
-          </h1>
-          <div className="flex items-center gap-4">
-            <ThemeToggle />
-            <button
-              onClick={handleLogout}
-              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              Çıkış Yap
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#0a0e27] text-white">
+      <DashboardHeader userEmail={user?.email} isAdmin={isAdmin} />
 
-      <main className="max-w-7xl mx-auto p-6">
-        {/* Profile Card */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700 shadow-xl hover:shadow-2xl hover:shadow-purple-500/10 transition-all mb-8">
-          <div className="flex flex-col sm:flex-row items-center gap-8">
+      <main className="max-w-7xl mx-auto p-6 lg:p-8 space-y-12">
+        {/* Profile Header */}
+        <section className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-8 border border-white/10">
+          <div className="flex items-center gap-6">
             {/* Avatar */}
-            <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full flex items-center justify-center shadow-lg">
-              <span className="text-4xl">👤</span>
+            <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-4xl font-bold shadow-lg shadow-blue-500/20">
+              {profile?.avatar_url ? (
+                <img
+                  src={profile.avatar_url}
+                  alt="Avatar"
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                user?.email?.charAt(0).toUpperCase()
+              )}
             </div>
 
             {/* User Info */}
-            <div className="flex-1 text-center sm:text-left">
-              <h2 className="text-3xl font-bold text-white mb-2">Profil</h2>
-              <p className="text-gray-400 text-lg mb-4">{user?.email}</p>
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="bg-gray-700/30 px-4 py-2 rounded-lg">
-                  <p className="text-gray-400 text-sm">Üyelik Tarihi</p>
-                  <p className="text-white font-semibold">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-white mb-2">
+                {user?.email}
+              </h1>
+              {profile?.bio && (
+                <p className="text-gray-400 text-sm">{profile.bio}</p>
+              )}
+              <div className="flex gap-4 mt-3">
+                <div className="text-sm">
+                  <span className="text-gray-500">Üyelik: </span>
+                  <span className="text-gray-300">
                     {new Date(user?.created_at).toLocaleDateString('tr-TR')}
-                  </p>
-                </div>
-                <div className="bg-gray-700/30 px-4 py-2 rounded-lg">
-                  <p className="text-gray-400 text-sm">Son Giriş</p>
-                  <p className="text-white font-semibold">
-                    {new Date(user?.last_sign_in_at).toLocaleDateString('tr-TR')}
-                  </p>
+                  </span>
                 </div>
               </div>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          {/* Favorites */}
-          <div className="bg-gradient-to-br from-pink-800 to-pink-900 rounded-2xl p-6 border border-pink-700 shadow-xl hover:shadow-2xl hover:shadow-pink-500/20 transition-all">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Favorilerim</h3>
-              <span className="text-3xl">❤️</span>
+        {/* Stats */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 rounded-2xl p-6 border border-blue-500/30">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+                <span className="text-2xl">❤️</span>
+              </div>
+              <div>
+                <p className="text-blue-300 text-sm font-medium">Favoriler</p>
+                <p className="text-3xl font-bold text-white">{stats.totalFavorites}</p>
+              </div>
             </div>
-            <p className="text-5xl font-bold text-pink-300 mb-2">{stats.favoriteCount}</p>
-            <p className="text-pink-200 text-sm">Favori filme eklendi</p>
           </div>
 
-          {/* Comments */}
-          <div className="bg-gradient-to-br from-blue-800 to-blue-900 rounded-2xl p-6 border border-blue-700 shadow-xl hover:shadow-2xl hover:shadow-blue-500/20 transition-all">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Yorumlar</h3>
-              <span className="text-3xl">💬</span>
+          <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 rounded-2xl p-6 border border-purple-500/30">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+                <span className="text-2xl">💬</span>
+              </div>
+              <div>
+                <p className="text-purple-300 text-sm font-medium">Yorumlar</p>
+                <p className="text-3xl font-bold text-white">{stats.totalComments}</p>
+              </div>
             </div>
-            <p className="text-5xl font-bold text-blue-300 mb-2">{stats.commentCount}</p>
-            <p className="text-blue-200 text-sm">Yorum yapıldı</p>
           </div>
 
-          {/* Average Rating */}
-          <div className="bg-gradient-to-br from-yellow-800 to-yellow-900 rounded-2xl p-6 border border-yellow-700 shadow-xl hover:shadow-2xl hover:shadow-yellow-500/20 transition-all">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-white">Ortalama Puan</h3>
-              <span className="text-3xl">⭐</span>
+          <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-800/20 rounded-2xl p-6 border border-yellow-500/30">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
+                <span className="text-2xl">⭐</span>
+              </div>
+              <div>
+                <p className="text-yellow-300 text-sm font-medium">Ortalama Puan</p>
+                <p className="text-3xl font-bold text-white">
+                  {stats.averageRating > 0 ? stats.averageRating : '-'}
+                </p>
+              </div>
             </div>
-            <p className="text-5xl font-bold text-yellow-300 mb-2">
-              {stats.averageRating > 0 ? stats.averageRating : '-'}
-            </p>
-            <p className="text-yellow-200 text-sm">
-              {stats.averageRating > 0 ? 'Ortalama puan' : 'Henüz puan verilmedi'}
-            </p>
           </div>
-        </div>
+        </section>
 
-        {/* Actions */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 shadow-xl">
-          <h3 className="text-2xl font-bold text-white mb-6">İşlemler</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              🎬 Tüm Filmler
-            </button>
-            <button
-              onClick={() => router.push('/favorites')}
-              className="bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-500 hover:to-pink-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg"
-            >
-              ❤️ Favorilerim
-            </button>
-          </div>
-        </div>
+        {/* Favorites Grid */}
+        <section>
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+            <span className="w-1 h-6 bg-pink-500 rounded-full"></span>
+            Favori Filmlerim
+          </h2>
+
+          {favorites.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-center bg-white/5 rounded-2xl border border-white/5">
+              <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mb-4">
+                <span className="text-3xl">💔</span>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-1">
+                Henüz Favori Film Yok
+              </h3>
+              <p className="text-gray-400 text-sm">
+                Beğendiğin filmleri favorilere ekleyerek buradan kolayca erişebilirsin.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {favorites.map((film) => (
+                <FilmCard key={film.id} film={film} />
+              ))}
+            </div>
+          )}
+        </section>
       </main>
     </div>
   );
