@@ -172,9 +172,9 @@ export default function FilmDetailPage() {
           .eq('id', userData.user.id)
           .single();
 
-        if (profileError && profileError.code !== 'PGRST116') {
-          console.error('Error fetching profile:', profileError);
-        }
+        // if (profileError && profileError.code !== 'PGRST116') {
+        //   console.error('Error fetching profile:', profileError);
+        // }
         setIsAdmin(profileData?.is_admin || false);
 
         // Check favorite status
