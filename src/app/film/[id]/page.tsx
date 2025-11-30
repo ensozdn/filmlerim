@@ -3,13 +3,17 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useParams } from 'next/navigation';
-import ThemeToggle from '@/components/ThemeToggle';
+import { useToast } from '@/context/ToastContext';
+import DashboardHeader from '@/components/DashboardHeader';
+import FilmCard from '@/components/FilmCard';
 
 interface Film {
   id: number;
   title: string;
   description: string;
   poster_url: string;
+  genres?: string[];
+  average_rating?: number;
 }
 
 interface Comment {
@@ -64,98 +68,158 @@ const MOCK_CAST: Record<string, Actor[]> = {
   ]
 };
 
+// Helper function for relative time
+function getRelativeTime(dateString: string) {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return 'Az önce';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} dakika önce`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} saat önce`;
+  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} gün önce`;
+  return date.toLocaleDateString('tr-TR');
+}
+
+// Helper for avatar color
+function getAvatarColor(email: string) {
+  const colors = [
+    'bg-red-500', 'bg-orange-500', 'bg-amber-500', 'bg-yellow-500',
+    'bg-lime-500', 'bg-green-500', 'bg-emerald-500', 'bg-teal-500',
+    'bg-cyan-500', 'bg-sky-500', 'bg-blue-500', 'bg-indigo-500',
+    'bg-violet-500', 'bg-purple-500', 'bg-fuchsia-500', 'bg-pink-500', 'bg-rose-500'
+  ];
+  let hash = 0;
+  for (let i = 0; i < email.length; i++) {
+    hash = email.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return colors[Math.abs(hash) % colors.length];
+}
+
 export default function FilmDetailPage() {
   const [film, setFilm] = useState<Film | null>(null);
+  const [relatedFilms, setRelatedFilms] = useState<Film[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
   const [user, setUser] = useState<any>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editCommentText, setEditCommentText] = useState('');
+  const [processingLikes, setProcessingLikes] = useState<Set<number>>(new Set());
   const [commentText, setCommentText] = useState('');
   const [rating, setRating] = useState(5);
   const [isFavorite, setIsFavorite] = useState(false);
   const [watchlistStatus, setWatchlistStatus] = useState<'to_watch' | 'watched' | null>(null);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const { showToast } = useToast(); // Use toast hook
   const router = useRouter();
   const params = useParams();
   const filmId = parseInt(params.id as string);
 
-  // Ortalama puanı hesapla
-  const averageRating =
-    comments.length > 0
-      ? (comments.reduce((sum, c) => sum + c.rating, 0) / comments.length).toFixed(1)
-      : 0;
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+    e.currentTarget.src = 'https://via.placeholder.com/200x300?text=No+Image';
+    e.currentTarget.onerror = null; // Prevent infinite loop
+  };
 
-  useEffect(() => {
-    const loadData = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
 
-      if (!user) {
-        router.push('/login');
-        return;
-      }
+  const averageRating = comments.length > 0
+    ? (comments.reduce((acc, comment) => acc + comment.rating, 0) / comments.length).toFixed(1)
+    : 'N/A';
 
-      setUser(user);
-
-      // Filmi getir
-      const { data: filmData } = await supabase
+  const fetchFilmDetails = async () => {
+    setLoading(true);
+    try {
+      const { data: filmData, error: filmError } = await supabase
         .from('films')
         .select('*')
         .eq('id', filmId)
         .single();
 
+      if (filmError) throw filmError;
       setFilm(filmData);
 
-      // Yorumları getir (likes ile birlikte)
-      const { data: commentsData } = await supabase
+      // Fetch related films
+      let relatedQuery = supabase
+        .from('films')
+        .select('*')
+        .neq('id', filmId);
+
+      if (filmData.genres && filmData.genres.length > 0) {
+        relatedQuery = relatedQuery.overlaps('genres', filmData.genres);
+      }
+
+      const { data: relatedData } = await relatedQuery.limit(4);
+      setRelatedFilms(relatedData || []);
+
+      const { data: commentsData, error: commentsError } = await supabase
         .from('comments')
-        .select('*, profiles(email), likes(id)')
+        .select('*, profiles(email), likes(id, user_id)') // Select user_id for likes
         .eq('film_id', filmId)
         .order('created_at', { ascending: false });
 
+      if (commentsError) throw commentsError;
       setComments(commentsData || []);
 
-      // Favoride olup olmadığını kontrol et
-      const { data: favoriteData } = await supabase
-        .from('favorites')
-        .select('*')
-        .eq('film_id', filmId)
-        .eq('user_id', user.id)
-        .single();
+      const { data: userData, error: userError } = await supabase.auth.getUser();
+      if (userError) throw userError;
+      setUser(userData.user);
 
-      setIsFavorite(!!favoriteData);
+      if (userData.user) {
+        // Check if admin
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('id', userData.user.id)
+          .single();
 
-      // Check watchlist status
-      const { data: watchlistData } = await supabase
-        .from('watchlist')
-        .select('status')
-        .eq('film_id', filmId)
-        .eq('user_id', user.id)
-        .single();
+        if (profileError && profileError.code !== 'PGRST116') {
+          console.error('Error fetching profile:', profileError);
+        }
+        setIsAdmin(profileData?.is_admin || false);
 
-      setWatchlistStatus(watchlistData?.status || null);
+        // Check favorite status
+        const { data: favoriteData } = await supabase
+          .from('favorites')
+          .select('id')
+          .eq('user_id', userData.user.id)
+          .eq('film_id', filmId)
+          .single();
+        setIsFavorite(!!favoriteData);
+
+        // Check watchlist status
+        const { data: watchlistData } = await supabase
+          .from('watchlist')
+          .select('status')
+          .eq('user_id', userData.user.id)
+          .eq('film_id', filmId)
+          .single();
+        setWatchlistStatus(watchlistData?.status || null);
+      }
+    } catch (error: any) {
+      console.error('Error fetching film details:', error.message);
+      showToast('Film detayları yüklenirken bir hata oluştu', 'error');
+    } finally {
       setLoading(false);
-    };
+    }
+  };
 
-    loadData();
-  }, [filmId, router]);
+  useEffect(() => {
+    if (filmId) {
+      fetchFilmDetails();
+    }
+  }, [filmId]);
 
   const validateComment = (): boolean => {
     if (!commentText.trim()) {
-      setError('Yorum yazınız');
+      showToast('Lütfen bir yorum yazın', 'warning');
       return false;
     }
     if (commentText.trim().length < 3) {
-      setError('Yorum en az 3 karakter olmalı');
+      showToast('Yorum en az 3 karakter olmalı', 'warning');
       return false;
     }
     if (commentText.length > 500) {
-      setError('Yorum en fazla 500 karakter olmalı');
-      return false;
-    }
-    if (!rating || rating < 1 || rating > 5) {
-      setError('Geçerli bir puan seçiniz (1-5)');
+      showToast('Yorum en fazla 500 karakter olmalı', 'warning');
       return false;
     }
     return true;
@@ -163,12 +227,10 @@ export default function FilmDetailPage() {
 
   const handleAddComment = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
 
-    if (!validateComment()) {
-      return;
-    }
+    if (!validateComment()) return;
+
+    setSubmitting(true);
 
     try {
       const { error } = await supabase.from('comments').insert([
@@ -180,23 +242,81 @@ export default function FilmDetailPage() {
         },
       ]);
 
-      if (error) {
-        setError(error.message || 'Yorum eklenemedi');
-      } else {
-        setSuccess('Yorumunuz eklendi!');
-        setCommentText('');
-        setRating(5);
-        // Yorumları yeniden yükle
-        const { data: commentsData } = await supabase
-          .from('comments')
-          .select('*, profiles(email), likes(id)')
-          .eq('film_id', filmId)
-          .order('created_at', { ascending: false });
+      if (error) throw error;
 
-        setComments(commentsData || []);
-      }
+      showToast('Yorumunuz başarıyla eklendi!', 'success');
+      setCommentText('');
+      setRating(5);
+
+      // Refresh comments
+      const { data: commentsData } = await supabase
+        .from('comments')
+        .select('*, profiles(email), likes(id)')
+        .eq('film_id', filmId)
+        .order('created_at', { ascending: false });
+
+      setComments(commentsData || []);
     } catch (err) {
-      setError('Bir hata oluştu. Lütfen tekrar deneyin');
+      showToast('Yorum eklenirken bir hata oluştu', 'error');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteComment = async (commentId: number) => {
+    if (!confirm('Bu yorumu silmek istediğinize emin misiniz?')) return;
+
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .delete()
+        .eq('id', commentId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      showToast('Yorum silindi', 'success');
+      setComments(comments.filter(c => c.id !== commentId));
+    } catch (err) {
+      showToast('Yorum silinirken hata oluştu', 'error');
+    }
+  };
+
+  const startEditing = (comment: Comment) => {
+    setEditingCommentId(comment.id);
+    setEditCommentText(comment.comment_text);
+  };
+
+  const cancelEditing = () => {
+    setEditingCommentId(null);
+    setEditCommentText('');
+  };
+
+  const handleUpdateComment = async (commentId: number) => {
+    if (!editCommentText.trim()) {
+      showToast('Yorum boş olamaz', 'warning');
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('comments')
+        .update({ comment_text: editCommentText.trim() })
+        .eq('id', commentId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      showToast('Yorum güncellendi', 'success');
+
+      // Update local state
+      setComments(comments.map(c =>
+        c.id === commentId ? { ...c, comment_text: editCommentText.trim() } : c
+      ));
+
+      cancelEditing();
+    } catch (err) {
+      showToast('Yorum güncellenirken hata oluştu', 'error');
     }
   };
 
@@ -219,7 +339,7 @@ export default function FilmDetailPage() {
 
       setIsFavorite(!isFavorite);
     } catch (err) {
-      setError('Bir hata oluştu');
+      showToast('Bir hata oluştu', 'error');
     }
   };
 
@@ -251,91 +371,95 @@ export default function FilmDetailPage() {
         }
       }
     } catch (err) {
-      setError('Bir hata oluştu');
+      showToast('Bir hata oluştu', 'error');
     }
   };
 
   const toggleLike = async (commentId: number) => {
-    try {
-      // Kullanıcının bu yoruma beğeni koyup koymadığını kontrol et
-      const { data: existingLike } = await supabase
-        .from('likes')
-        .select('id')
-        .eq('comment_id', commentId)
-        .eq('user_id', user.id)
-        .single();
+    if (processingLikes.has(commentId)) return;
 
-      if (existingLike) {
-        // Beğeni zaten var, kaldır
-        await supabase
+    // Add to processing set
+    setProcessingLikes(prev => new Set(prev).add(commentId));
+
+    try {
+      // Optimistic UI update
+      const isLiked = comments.find(c => c.id === commentId)?.likes.some(l => l.user_id === user.id);
+
+      // Update UI immediately
+      setComments(prev => prev.map(c => {
+        if (c.id === commentId) {
+          return {
+            ...c,
+            likes: isLiked
+              ? c.likes.filter(l => l.user_id !== user.id)
+              : [...c.likes, { id: Date.now(), comment_id: commentId, user_id: user.id }]
+          };
+        }
+        return c;
+      }));
+
+      // Perform actual request
+      if (isLiked) {
+        const { data: existingLike } = await supabase
           .from('likes')
-          .delete()
-          .eq('id', existingLike.id);
+          .select('id')
+          .eq('comment_id', commentId)
+          .eq('user_id', user.id)
+          .single();
+
+        if (existingLike) {
+          await supabase.from('likes').delete().eq('id', existingLike.id);
+        }
       } else {
-        // Beğeni ekle
-        await supabase.from('likes').insert([
-          {
-            comment_id: commentId,
-            user_id: user.id,
-          },
-        ]);
+        // Check if already liked to prevent duplicates (double safety)
+        const { data: existingLike } = await supabase
+          .from('likes')
+          .select('id')
+          .eq('comment_id', commentId)
+          .eq('user_id', user.id)
+          .single();
+
+        if (!existingLike) {
+          await supabase.from('likes').insert([{ comment_id: commentId, user_id: user.id }]);
+        }
       }
 
-      // Yorumları yeniden yükle
+      // Re-fetch to sync exact state
       const { data: commentsData } = await supabase
         .from('comments')
-        .select('*, profiles(email), likes(id)')
+        .select('*, profiles(email), likes(id, user_id)')
         .eq('film_id', filmId)
         .order('created_at', { ascending: false });
 
-      setComments(commentsData || []);
+      if (commentsData) setComments(commentsData);
+
     } catch (err) {
       console.error('Like error:', err);
-      setError('Bir hata oluştu');
+      showToast('Bir hata oluştu', 'error');
+      // Revert optimistic update could be added here
+    } finally {
+      // Remove from processing set
+      setProcessingLikes(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(commentId);
+        return newSet;
+      });
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        <header className="bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700 p-6 shadow-xl">
-          <div className="max-w-7xl mx-auto flex justify-between items-center">
-            <div className="skeleton w-20 h-8"></div>
-            <div className="skeleton w-48 h-10"></div>
-            <div className="w-20"></div>
-          </div>
-        </header>
+      <div className="min-h-screen bg-[#0a0e27]">
+        <div className="h-20 border-b border-white/5 bg-[#0a0e27]/80 backdrop-blur-xl"></div>
         <main className="max-w-7xl mx-auto p-6">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700 mb-8">
+          <div className="bg-white/5 rounded-2xl p-8 border border-white/5 mb-8">
             <div className="flex gap-8">
-              <div className="skeleton w-48 h-64"></div>
+              <div className="skeleton w-48 h-64 bg-white/5 rounded-xl"></div>
               <div className="flex-1 space-y-4">
-                <div className="skeleton w-3/4 h-10"></div>
-                <div className="skeleton w-1/2 h-8"></div>
-                <div className="skeleton w-full h-20"></div>
-                <div className="skeleton w-32 h-10"></div>
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-1">
-              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 space-y-4">
-                <div className="skeleton w-32 h-8"></div>
-                <div className="skeleton w-full h-10"></div>
-                <div className="skeleton w-full h-24"></div>
-                <div className="skeleton w-full h-10"></div>
-              </div>
-            </div>
-            <div className="lg:col-span-2">
-              <div className="skeleton w-48 h-8 mb-6"></div>
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 space-y-3">
-                    <div className="skeleton w-32 h-5"></div>
-                    <div className="skeleton w-full h-12"></div>
-                    <div className="skeleton w-20 h-6"></div>
-                  </div>
-                ))}
+                <div className="skeleton w-3/4 h-10 bg-white/5 rounded"></div>
+                <div className="skeleton w-1/2 h-8 bg-white/5 rounded"></div>
+                <div className="skeleton w-full h-20 bg-white/5 rounded"></div>
+                <div className="skeleton w-32 h-10 bg-white/5 rounded"></div>
               </div>
             </div>
           </div>
@@ -346,29 +470,15 @@ export default function FilmDetailPage() {
 
   if (!film) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center">
+      <div className="min-h-screen bg-[#0a0e27] flex items-center justify-center">
         <p className="text-white text-lg">Film bulunamadı</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      {/* Header */}
-      <header className="bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700 p-6 shadow-xl">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="text-blue-400 hover:text-blue-300 font-semibold transition-colors flex items-center gap-2"
-          >
-            ← Geri
-          </button>
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            Filmlerim.iO
-          </h1>
-          <ThemeToggle />
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#0a0e27] text-white">
+      <DashboardHeader userEmail={user?.email} isAdmin={isAdmin} />
 
       <main className="max-w-7xl mx-auto p-6">
         {/* Film Info */}
@@ -378,6 +488,7 @@ export default function FilmDetailPage() {
               <img
                 src={film.poster_url}
                 alt={film.title}
+                onError={handleImageError}
                 className="w-48 h-64 object-cover rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 transition-all"
               />
             )}
@@ -396,8 +507,8 @@ export default function FilmDetailPage() {
                 <button
                   onClick={toggleFavorite}
                   className={`${isFavorite
-                      ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 shadow-lg shadow-red-500/30'
-                      : 'bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-500 hover:to-pink-600 shadow-lg shadow-pink-500/30'
+                    ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 shadow-lg shadow-red-500/30'
+                    : 'bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-500 hover:to-pink-600 shadow-lg shadow-pink-500/30'
                     } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
                 >
                   {isFavorite ? '❤️ Favorilerden Çıkar' : '🤍 Favorilere Ekle'}
@@ -406,8 +517,8 @@ export default function FilmDetailPage() {
                 <button
                   onClick={() => toggleWatchlist('watched')}
                   className={`${watchlistStatus === 'watched'
-                      ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 shadow-lg shadow-green-500/30'
-                      : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 shadow-lg shadow-gray-500/30'
+                    ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 shadow-lg shadow-green-500/30'
+                    : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 shadow-lg shadow-gray-500/30'
                     } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
                 >
                   {watchlistStatus === 'watched' ? '✅ İzledim' : '👁️ İzledim Olarak İşaretle'}
@@ -416,8 +527,8 @@ export default function FilmDetailPage() {
                 <button
                   onClick={() => toggleWatchlist('to_watch')}
                   className={`${watchlistStatus === 'to_watch'
-                      ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 shadow-lg shadow-blue-500/30'
-                      : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 shadow-lg shadow-gray-500/30'
+                    ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 shadow-lg shadow-blue-500/30'
+                    : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 shadow-lg shadow-gray-500/30'
                     } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
                 >
                   {watchlistStatus === 'to_watch' ? '📌 İzleme Listemde' : '➕ İzleyeceğim'}
@@ -440,6 +551,7 @@ export default function FilmDetailPage() {
                   <img
                     src={actor.image_url}
                     alt={actor.name}
+                    onError={handleImageError}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
@@ -449,6 +561,21 @@ export default function FilmDetailPage() {
             ))}
           </div>
         </div>
+
+        {/* Related Films */}
+        {relatedFilms.length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+              <span className="w-1 h-6 bg-purple-500 rounded-full"></span>
+              Benzer Filmler
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {relatedFilms.map((relatedFilm) => (
+                <FilmCard key={relatedFilm.id} film={relatedFilm} />
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Comments Form */}
@@ -487,31 +614,12 @@ export default function FilmDetailPage() {
                   />
                 </div>
 
-                {error && (
-                  <div className="animate-slide-in bg-red-500/15 border-l-4 border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
-                    <span className="text-lg">⚠️</span>
-                    <div>
-                      <p className="font-semibold">Hata</p>
-                      <p className="text-xs mt-1">{error}</p>
-                    </div>
-                  </div>
-                )}
-
-                {success && (
-                  <div className="animate-slide-in bg-green-500/15 border-l-4 border-green-500 text-green-400 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
-                    <span className="text-lg">✅</span>
-                    <div>
-                      <p className="font-semibold">Başarılı</p>
-                      <p className="text-xs mt-1">{success}</p>
-                    </div>
-                  </div>
-                )}
-
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+                  disabled={submitting}
+                  className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  Gönder
+                  {submitting ? 'Gönderiliyor...' : 'Gönder'}
                 </button>
               </form>
             </div>
@@ -533,28 +641,91 @@ export default function FilmDetailPage() {
                     key={comment.id}
                     className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl p-6 border border-gray-700 hover:border-blue-500 transition-all hover:shadow-lg hover:shadow-blue-500/10"
                   >
-                    <div className="flex justify-between items-start mb-3">
-                      <div>
-                        <p className="text-white font-semibold">
-                          {comment.profiles?.email}
-                        </p>
-                        <p className="text-yellow-400 text-sm mt-1">
-                          {'⭐'.repeat(comment.rating)}
-                        </p>
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex items-center gap-3">
+                        {/* Avatar */}
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg ${getAvatarColor(comment.profiles?.email || '')}`}>
+                          {(comment.profiles?.email || '?').charAt(0).toUpperCase()}
+                        </div>
+
+                        <div>
+                          <p className="text-white font-semibold text-sm">
+                            {comment.profiles?.email.split('@')[0]}
+                          </p>
+                          <div className="flex items-center gap-2">
+                            <p className="text-yellow-400 text-xs">
+                              {'⭐'.repeat(comment.rating)}
+                            </p>
+                            <span className="text-gray-600 text-xs">•</span>
+                            <p className="text-gray-500 text-xs">
+                              {getRelativeTime(comment.created_at)}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-gray-500 text-xs">
-                        {new Date(comment.created_at).toLocaleDateString('tr-TR')}
-                      </p>
+
+                      {user?.id === comment.user_id && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => startEditing(comment)}
+                            className="text-gray-500 hover:text-blue-400 transition-colors p-1 hover:bg-white/5 rounded-lg"
+                            title="Yorumu Düzenle"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteComment(comment.id)}
+                            className="text-gray-500 hover:text-red-400 transition-colors p-1 hover:bg-white/5 rounded-lg"
+                            title="Yorumu Sil"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-gray-300 mb-4 leading-relaxed">{comment.comment_text}</p>
+
+                    {editingCommentId === comment.id ? (
+                      <div className="mb-4">
+                        <textarea
+                          value={editCommentText}
+                          onChange={(e) => setEditCommentText(e.target.value)}
+                          className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none mb-2"
+                          rows={3}
+                        />
+                        <div className="flex gap-2 justify-end">
+                          <button
+                            onClick={cancelEditing}
+                            className="px-3 py-1 text-sm text-gray-400 hover:text-white transition-colors"
+                          >
+                            İptal
+                          </button>
+                          <button
+                            onClick={() => handleUpdateComment(comment.id)}
+                            className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+                          >
+                            Kaydet
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-gray-300 mb-4 leading-relaxed text-sm">{comment.comment_text}</p>
+                    )}
+
                     <button
                       onClick={() => toggleLike(comment.id)}
-                      className={`text-sm font-semibold transition-all duration-300 px-3 py-1 rounded-lg ${comment.likes?.some((like) => like.user_id === user?.id)
+                      className={`text-xs font-semibold transition-all duration-300 px-3 py-1.5 rounded-lg flex items-center gap-1.5 ${comment.likes?.some((like) => like.user_id === user?.id)
                         ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30'
-                        : 'bg-gray-700/30 text-gray-400 hover:bg-gray-700/50 hover:text-red-400'
+                        : 'bg-gray-700/30 text-gray-400 hover:bg-gray-700/50 hover:text-white'
                         }`}
                     >
-                      👍 {comment.likes?.length || 0}
+                      <svg className={`w-4 h-4 ${comment.likes?.some((like) => like.user_id === user?.id) ? 'fill-current' : 'fill-none'}`} stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                      </svg>
+                      {comment.likes?.length || 0}
                     </button>
                   </div>
                 ))}

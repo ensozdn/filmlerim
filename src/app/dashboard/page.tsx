@@ -152,6 +152,88 @@ export default function DashboardPage() {
 
       <main className="max-w-7xl mx-auto p-6 lg:p-8 space-y-12">
 
+        {/* Statistics Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-[#1a1f35] p-6 rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <span className="text-6xl">🎬</span>
+            </div>
+            <h3 className="text-gray-400 text-sm font-medium mb-1">Toplam Film</h3>
+            <p className="text-3xl font-bold text-white">{films.length}</p>
+            <div className="mt-4 flex items-center text-xs text-green-400">
+              <span className="flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                Aktif
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-[#1a1f35] p-6 rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <span className="text-6xl">💬</span>
+            </div>
+            <h3 className="text-gray-400 text-sm font-medium mb-1">Toplam Yorum</h3>
+            <p className="text-3xl font-bold text-white">
+              {films.reduce((acc, film: any) => acc + (film.comment_count || 0), 0)}
+            </p>
+            <div className="mt-4 flex items-center text-xs text-blue-400">
+              <span className="flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                </svg>
+                Etkileşim
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-[#1a1f35] p-6 rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <span className="text-6xl">⭐</span>
+            </div>
+            <h3 className="text-gray-400 text-sm font-medium mb-1">Ortalama Puan</h3>
+            <p className="text-3xl font-bold text-white">
+              {(films.reduce((acc, film: any) => acc + (film.average_rating || 0), 0) / (films.length || 1)).toFixed(1)}
+            </p>
+            <div className="mt-4 flex items-center text-xs text-yellow-400">
+              <span className="flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+                Genel Memnuniyet
+              </span>
+            </div>
+          </div>
+
+          <div className="bg-[#1a1f35] p-6 rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <span className="text-6xl">🎭</span>
+            </div>
+            <h3 className="text-gray-400 text-sm font-medium mb-1">En Popüler Tür</h3>
+            <p className="text-3xl font-bold text-white truncate">
+              {(() => {
+                const genreCounts: Record<string, number> = {};
+                films.forEach((film: any) => {
+                  film.genres?.forEach((g: string) => {
+                    genreCounts[g] = (genreCounts[g] || 0) + 1;
+                  });
+                });
+                const topGenre = Object.entries(genreCounts).sort((a, b) => b[1] - a[1])[0];
+                return topGenre ? topGenre[0] : '-';
+              })()}
+            </p>
+            <div className="mt-4 flex items-center text-xs text-purple-400">
+              <span className="flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                </svg>
+                Trend
+              </span>
+            </div>
+          </div>
+        </div>
+
         {/* Trending Carousel */}
         {trendingFilms.length > 0 && (
           <section>
