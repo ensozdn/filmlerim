@@ -8,6 +8,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import HeroSlider from '@/components/HeroSlider';
 import FilmCarousel from '@/components/FilmCarousel';
 import FilmCard from '@/components/FilmCard';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface Film {
   id: number;
@@ -20,6 +21,7 @@ interface Film {
 const FILMS_PER_PAGE = 12;
 
 export default function DashboardPage() {
+  const { t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [films, setFilms] = useState<Film[]>([]);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -83,15 +85,26 @@ export default function DashboardPage() {
         console.error('Profile fetch error:', err);
       }
 
-      // Fetch all films with genres and comments
+      // Fetch all films
       const { data: filmsData } = await supabase
         .from('films')
-        .select('*, comments(rating)')
+        .select('*')
         .order('title');
 
-      // Calculate average ratings
-      const filmsWithRatings = (filmsData || []).map((film: any) => {
-        const ratings = film.comments?.map((c: any) => c.rating) || [];
+      // Fetch all comments separately to avoid duplicates
+      const { data: commentsData } = await supabase
+        .from('comments')
+        .select('film_id, rating');
+
+      // Remove duplicate films by ID (just in case)
+      const uniqueFilms = Array.from(
+        new Map((filmsData || []).map((film: any) => [film.id, film])).values()
+      );
+
+      // Calculate average ratings per film
+      const filmsWithRatings = uniqueFilms.map((film: any) => {
+        const filmComments = (commentsData || []).filter((c: any) => c.film_id === film.id);
+        const ratings = filmComments.map((c: any) => c.rating);
         const avgRating = ratings.length > 0
           ? ratings.reduce((sum: number, r: number) => sum + r, 0) / ratings.length
           : 0;
@@ -158,14 +171,14 @@ export default function DashboardPage() {
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <span className="text-6xl">🎬</span>
             </div>
-            <h3 className="text-gray-400 text-sm font-medium mb-1">Toplam Film</h3>
+            <h3 className="text-gray-400 text-sm font-medium mb-1">{t('dashboard.totalFilms')}</h3>
             <p className="text-3xl font-bold text-white">{films.length}</p>
             <div className="mt-4 flex items-center text-xs text-green-400">
               <span className="flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                 </svg>
-                Aktif
+                {t('dashboard.active')}
               </span>
             </div>
           </div>
@@ -174,7 +187,7 @@ export default function DashboardPage() {
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <span className="text-6xl">💬</span>
             </div>
-            <h3 className="text-gray-400 text-sm font-medium mb-1">Toplam Yorum</h3>
+            <h3 className="text-gray-400 text-sm font-medium mb-1">{t('dashboard.totalComments')}</h3>
             <p className="text-3xl font-bold text-white">
               {films.reduce((acc, film: any) => acc + (film.comment_count || 0), 0)}
             </p>
@@ -183,7 +196,7 @@ export default function DashboardPage() {
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
                 </svg>
-                Etkileşim
+                {t('dashboard.interaction')}
               </span>
             </div>
           </div>
@@ -192,7 +205,7 @@ export default function DashboardPage() {
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <span className="text-6xl">⭐</span>
             </div>
-            <h3 className="text-gray-400 text-sm font-medium mb-1">Ortalama Puan</h3>
+            <h3 className="text-gray-400 text-sm font-medium mb-1">{t('dashboard.avgRating')}</h3>
             <p className="text-3xl font-bold text-white">
               {(films.reduce((acc, film: any) => acc + (film.average_rating || 0), 0) / (films.length || 1)).toFixed(1)}
             </p>
@@ -201,7 +214,7 @@ export default function DashboardPage() {
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                 </svg>
-                Genel Memnuniyet
+                {t('dashboard.satisfaction')}
               </span>
             </div>
           </div>
@@ -210,7 +223,7 @@ export default function DashboardPage() {
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <span className="text-6xl">🎭</span>
             </div>
-            <h3 className="text-gray-400 text-sm font-medium mb-1">En Popüler Tür</h3>
+            <h3 className="text-gray-400 text-sm font-medium mb-1">{t('dashboard.topGenre')}</h3>
             <p className="text-3xl font-bold text-white truncate">
               {(() => {
                 const genreCounts: Record<string, number> = {};
@@ -228,7 +241,7 @@ export default function DashboardPage() {
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
                 </svg>
-                Trend
+                {t('dashboard.trending')}
               </span>
             </div>
           </div>
@@ -237,7 +250,7 @@ export default function DashboardPage() {
         {/* Trending Carousel */}
         {trendingFilms.length > 0 && (
           <section>
-            <FilmCarousel title="Trend Filmler" films={trendingFilms} />
+            <FilmCarousel title={t('dashboard.trendingFilms')} films={trendingFilms} />
           </section>
         )}
 
@@ -247,7 +260,7 @@ export default function DashboardPage() {
             <div>
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <span className="w-1 h-6 bg-purple-500 rounded-full"></span>
-                Tüm Filmler
+                {t('dashboard.allFilms')}
               </h2>
             </div>
 
@@ -262,25 +275,12 @@ export default function DashboardPage() {
                   }}
                   className="appearance-none px-4 py-2.5 pr-8 bg-[#1a1f35] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer hover:bg-[#1f2937]"
                 >
-                  <option value="">Tüm Türler</option>
-                  <option value="Aksiyon">Aksiyon</option>
-                  <option value="Macera">Macera</option>
-                  <option value="Animasyon">Animasyon</option>
-                  <option value="Komedi">Komedi</option>
-                  <option value="Suç">Suç</option>
-                  <option value="Belgesel">Belgesel</option>
-                  <option value="Drama">Drama</option>
-                  <option value="Aile">Aile</option>
-                  <option value="Fantastik">Fantastik</option>
-                  <option value="Tarih">Tarih</option>
-                  <option value="Korku">Korku</option>
-                  <option value="Müzik">Müzik</option>
-                  <option value="Gizem">Gizem</option>
-                  <option value="Romantik">Romantik</option>
-                  <option value="Bilim-Kurgu">Bilim-Kurgu</option>
-                  <option value="Gerilim">Gerilim</option>
-                  <option value="Savaş">Savaş</option>
-                  <option value="Western">Western</option>
+                  <option value="">{t('dashboard.allGenres')}</option>
+                  {['action', 'adventure', 'animation', 'comedy', 'crime', 'documentary', 'drama', 'family', 'fantasy', 'history', 'horror', 'music', 'mystery', 'romance', 'scifi', 'thriller', 'war', 'western'].map((genreKey) => (
+                    <option key={genreKey} value={t(`genre.${genreKey}`)}>
+                      {t(`genre.${genreKey}`)}
+                    </option>
+                  ))}
                 </select>
                 <svg className="w-3 h-3 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -297,8 +297,8 @@ export default function DashboardPage() {
                   }}
                   className="appearance-none px-4 py-2.5 pr-8 bg-[#1a1f35] border border-white/10 rounded-lg text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all cursor-pointer hover:bg-[#1f2937]"
                 >
-                  <option value="title">A-Z Sıralı</option>
-                  <option value="newest">En Yeniler</option>
+                  <option value="title">{t('dashboard.sortAZ')}</option>
+                  <option value="newest">{t('dashboard.sortNewest')}</option>
                 </select>
                 <svg className="w-3 h-3 text-gray-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
@@ -313,16 +313,16 @@ export default function DashboardPage() {
               <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mb-4">
                 <span className="text-3xl">🎬</span>
               </div>
-              <h3 className="text-lg font-semibold text-white mb-1">Henüz Film Yok</h3>
-              <p className="text-gray-400 text-sm">Sistemde henüz eklenmiş bir film bulunmuyor.</p>
+              <h3 className="text-lg font-semibold text-white mb-1">{t('dashboard.noFilmsYet')}</h3>
+              <p className="text-gray-400 text-sm">{t('dashboard.noFilmsDesc')}</p>
             </div>
           ) : sortedFilms.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center bg-white/5 rounded-2xl border border-white/5">
               <div className="w-16 h-16 bg-gray-800/50 rounded-full flex items-center justify-center mb-4">
                 <span className="text-3xl">🔍</span>
               </div>
-              <h3 className="text-lg font-semibold text-white mb-1">Sonuç Bulunamadı</h3>
-              <p className="text-gray-400 text-sm">"{searchQuery}" aramasına uygun film bulunamadı.</p>
+              <h3 className="text-lg font-semibold text-white mb-1">{t('dashboard.noResults')}</h3>
+              <p className="text-gray-400 text-sm">{t('dashboard.noResultsDesc', { query: searchQuery })}</p>
             </div>
           ) : (
             <>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 import DashboardHeader from '@/components/DashboardHeader';
 import FilmCard from '@/components/FilmCard';
 
@@ -15,6 +16,7 @@ interface Film {
 }
 
 export default function FavoritesPage() {
+  const { t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [films, setFilms] = useState<Film[]>([]);
@@ -99,10 +101,10 @@ export default function FavoritesPage() {
         <section>
           <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
             <span className="w-1 h-8 bg-pink-500 rounded-full"></span>
-            Favorilerim
+            {t('favorites.title')}
           </h1>
           <p className="text-gray-400">
-            {films.length} favori filmin var
+            {t('favorites.count', { count: films.length })}
           </p>
         </section>
 
@@ -114,10 +116,10 @@ export default function FavoritesPage() {
                 <span className="text-3xl">💔</span>
               </div>
               <h3 className="text-lg font-semibold text-white mb-1">
-                Henüz Favori Film Yok
+                {t('favorites.noFavorites')}
               </h3>
               <p className="text-gray-400 text-sm">
-                Beğendiğin filmleri favorilere ekleyerek buradan kolayca erişebilirsin.
+                {t('favorites.noFavoritesDesc')}
               </p>
             </div>
           ) : (

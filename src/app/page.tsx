@@ -3,9 +3,11 @@
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 
 export default function Home() {
   const router = useRouter();
+  const { t } = useLanguage();
 
   useEffect(() => {
     const checkUser = async () => {
@@ -42,13 +44,13 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-4">
           <a href="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
-            Giriş Yap
+            {t('auth.login')}
           </a>
           <a
             href="/signup"
             className="px-5 py-2.5 bg-white text-black text-sm font-semibold rounded-full hover:bg-gray-100 transition-all transform hover:scale-105 shadow-lg shadow-white/10"
           >
-            Kayıt Ol
+            {t('auth.signup')}
           </a>
         </div>
       </nav>
@@ -57,21 +59,20 @@ export default function Home() {
       <main className="relative z-10 flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8 animate-fade-in-up">
           <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-          <span className="text-xs font-medium text-gray-300">Yeni Nesil Film Platformu</span>
+          <span className="text-xs font-medium text-gray-300">{t('landing.badge')}</span>
         </div>
 
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 max-w-5xl mx-auto leading-tight animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
           <span className="block text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-gray-500">
-            Sinema Dünyasını
+            {t('landing.heroTitle1')}
           </span>
           <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-            Keşfet ve Paylaş
+            {t('landing.heroTitle2')}
           </span>
         </h1>
 
         <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-          İzlediğin filmleri listele, favorilerini oluştur ve sinema tutkunlarıyla etkileşime geç. 
-          Modern arayüz ile film deneyimini bir üst seviyeye taşı.
+          {t('landing.heroDescription')}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
@@ -79,7 +80,7 @@ export default function Home() {
             href="/signup"
             className="px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full font-semibold text-lg hover:shadow-lg hover:shadow-blue-500/25 transition-all transform hover:scale-105 flex items-center justify-center gap-2"
           >
-            Hemen Başla
+            {t('landing.getStarted')}
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
@@ -88,7 +89,7 @@ export default function Home() {
             href="#features"
             className="px-8 py-4 bg-white/5 text-white border border-white/10 rounded-full font-semibold text-lg hover:bg-white/10 transition-all backdrop-blur-sm flex items-center justify-center"
           >
-            Daha Fazla Bilgi
+            {t('landing.learnMore')}
           </a>
         </div>
 

@@ -3,7 +3,9 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ThemeToggle from './ThemeToggle';
+import LanguageToggle from './LanguageToggle';
 import { supabase } from '@/lib/supabase';
+import { useLanguage } from '@/context/LanguageContext';
 
 interface Film {
     id: number;
@@ -22,6 +24,7 @@ interface DashboardHeaderProps {
 
 export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQuery = '', films = [], onGenreSelect }: DashboardHeaderProps) {
     const router = useRouter();
+    const { t } = useLanguage();
     const [genreDropdownOpen, setGenreDropdownOpen] = useState(false);
     const [searchDropdownOpen, setSearchDropdownOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -53,7 +56,8 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
 
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-6 ml-8 mr-auto">
-                    <a href="/dashboard" className="text-white font-medium hover:text-gray-300 transition-colors">Ana Sayfa</a>
+                    <a href="/dashboard" className="text-white font-medium hover:text-gray-300 transition-colors">{t('nav.home')}</a>
+                    <a href="#trending" onClick={(e) => { e.preventDefault(); document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-300 font-medium hover:text-white transition-colors">{t('nav.trending')}</a>
 
                     {/* Genres Dropdown */}
                     <div className="relative">
@@ -61,7 +65,7 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
                             onClick={() => setGenreDropdownOpen(!genreDropdownOpen)}
                             className="text-gray-300 font-medium hover:text-white transition-colors flex items-center gap-1"
                         >
-                            Türler
+                            {t('nav.genres')}
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -69,16 +73,16 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
 
                         {genreDropdownOpen && (
                             <div className="absolute top-full left-0 mt-2 w-48 bg-[#1a1f35] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
-                                {['Aksiyon', 'Macera', 'Animasyon', 'Komedi', 'Suç', 'Belgesel', 'Drama', 'Aile', 'Fantastik', 'Tarih', 'Korku', 'Müzik', 'Gizem', 'Romantik', 'Bilim-Kurgu', 'Gerilim', 'Savaş', 'Western'].map((genre) => (
+                                {['action', 'adventure', 'animation', 'comedy', 'crime', 'documentary', 'drama', 'family', 'fantasy', 'history', 'horror', 'music', 'mystery', 'romance', 'scifi', 'thriller', 'war', 'western'].map((genreKey) => (
                                     <button
-                                        key={genre}
+                                        key={genreKey}
                                         onClick={() => {
-                                            onGenreSelect?.(genre);
+                                            onGenreSelect?.(t(`genre.${genreKey}`));
                                             setGenreDropdownOpen(false);
                                         }}
                                         className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
                                     >
-                                        {genre}
+                                        {t(`genre.${genreKey}`)}
                                     </button>
                                 ))}
                             </div>
@@ -93,7 +97,7 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
                         <div className="relative group">
                             <input
                                 type="text"
-                                placeholder="Film ara..."
+                                placeholder={t('nav.searchPlaceholder')}
                                 value={searchQuery}
                                 onChange={(e) => {
                                     onSearch(e.target.value);
@@ -161,7 +165,7 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
                                 <a
                                     href="/admin"
                                     className="p-2 rounded-lg bg-purple-500/10 text-purple-400 hover:bg-purple-500/20 hover:text-purple-300 transition-all"
-                                    title="Admin Paneli"
+                                    title={t('nav.adminPanel')}
                                 >
                                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -172,18 +176,19 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
 
                             <a
                                 href="/watchlist"
-                                className="p-2 rounded-lg bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 hover:text-blue-300 transition-all"
-                                title="İzleme Listem"
+                                className="group relative p-2 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 transition-all duration-300 transform hover:scale-110"
+                                title={t('nav.watchlist')}
                             >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                                <svg className="w-5 h-5 text-amber-400 group-hover:text-amber-300 transition-colors" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
                                 </svg>
+                                <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full opacity-0 group-hover:opacity-100 transition-opacity animate-pulse"></div>
                             </a>
 
                             <a
                                 href="/favorites"
                                 className="p-2 rounded-lg bg-pink-500/10 text-pink-400 hover:bg-pink-500/20 hover:text-pink-300 transition-all"
-                                title="Favorilerim"
+                                title={t('nav.favorites')}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -193,11 +198,12 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
                             <div className="h-6 w-px bg-white/10 mx-1"></div>
 
                             <ThemeToggle />
+                            <LanguageToggle />
 
                             <button
                                 onClick={handleLogout}
                                 className="p-2 rounded-lg bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-all"
-                                title="Çıkış Yap"
+                                title={t('nav.logout')}
                             >
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -230,7 +236,7 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
                         <div className="relative">
                             <input
                                 type="text"
-                                placeholder="Film ara..."
+                                placeholder={t('nav.searchPlaceholder')}
                                 value={searchQuery}
                                 onChange={(e) => onSearch(e.target.value)}
                                 className="w-full px-4 py-2 pl-10 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
@@ -263,22 +269,25 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
                     )}
 
                     <div className="space-y-2">
-                        <a href="/dashboard" className="block px-4 py-2 text-gray-300 hover:bg-white/5 rounded-lg transition-colors">Ana Sayfa</a>
-                        <a href="/watchlist" className="block px-4 py-2 text-gray-300 hover:bg-white/5 rounded-lg transition-colors">İzleme Listem</a>
-                        <a href="/favorites" className="block px-4 py-2 text-gray-300 hover:bg-white/5 rounded-lg transition-colors">Favorilerim</a>
+                        <a href="/dashboard" className="block px-4 py-2 text-gray-300 hover:bg-white/5 rounded-lg transition-colors">{t('nav.home')}</a>
+                        <a href="/watchlist" className="block px-4 py-2 text-gray-300 hover:bg-white/5 rounded-lg transition-colors">{t('nav.watchlist')}</a>
+                        <a href="/favorites" className="block px-4 py-2 text-gray-300 hover:bg-white/5 rounded-lg transition-colors">{t('nav.favorites')}</a>
                         {isAdmin && (
-                            <a href="/admin" className="block px-4 py-2 text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors">Admin Paneli</a>
+                            <a href="/admin" className="block px-4 py-2 text-purple-400 hover:bg-purple-500/10 rounded-lg transition-colors">{t('nav.adminPanel')}</a>
                         )}
-                        <a href="/profile" className="block px-4 py-2 text-gray-300 hover:bg-white/5 rounded-lg transition-colors">Profilim ({userEmail})</a>
+                        <a href="/profile" className="block px-4 py-2 text-gray-300 hover:bg-white/5 rounded-lg transition-colors">{t('nav.profile')} ({userEmail})</a>
                     </div>
 
                     <div className="pt-4 border-t border-white/5 flex items-center justify-between">
-                        <ThemeToggle />
+                        <div className="flex items-center gap-2">
+                            <ThemeToggle />
+                            <LanguageToggle />
+                        </div>
                         <button
                             onClick={handleLogout}
                             className="text-red-400 hover:text-red-300 text-sm font-medium"
                         >
-                            Çıkış Yap
+                            {t('nav.logout')}
                         </button>
                     </div>
                 </div>

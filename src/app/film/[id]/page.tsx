@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useParams } from 'next/navigation';
 import { useToast } from '@/context/ToastContext';
+import { useLanguage } from '@/context/LanguageContext';
 import DashboardHeader from '@/components/DashboardHeader';
 import FilmCard from '@/components/FilmCard';
 
@@ -168,14 +169,14 @@ export default function FilmDetailPage() {
         // Check if admin
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
-          .select('is_admin')
+          .select('role')
           .eq('id', userData.user.id)
           .single();
 
         // if (profileError && profileError.code !== 'PGRST116') {
         //   console.error('Error fetching profile:', profileError);
         // }
-        setIsAdmin(profileData?.is_admin || false);
+        setIsAdmin(profileData?.role === 'admin');
 
         // Check favorite status
         const { data: favoriteData } = await supabase

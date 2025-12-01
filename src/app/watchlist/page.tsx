@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 import DashboardHeader from '@/components/DashboardHeader';
 import FilmCard from '@/components/FilmCard';
 
@@ -23,6 +24,7 @@ interface WatchlistItem {
 }
 
 export default function WatchlistPage() {
+    const { t } = useLanguage();
     const [user, setUser] = useState<any>(null);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -93,9 +95,9 @@ export default function WatchlistPage() {
                 <section>
                     <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
                         <span className="w-1 h-8 bg-blue-500 rounded-full"></span>
-                        İzleme Listem
+                        {t('watchlist.title')}
                     </h1>
-                    <p className="text-gray-400">İzlediğin ve izleyeceğin filmler</p>
+                    <p className="text-gray-400">{t('watchlist.description')}</p>
                 </section>
 
                 {/* Tabs */}
@@ -107,7 +109,7 @@ export default function WatchlistPage() {
                                 : 'bg-white/5 text-gray-400 hover:bg-white/10'
                             }`}
                     >
-                        📌 İzleyeceklerim ({watchlistItems.filter(i => i.status === 'to_watch').length})
+                        📌 {t('watchlist.toWatch')} ({watchlistItems.filter(i => i.status === 'to_watch').length})
                     </button>
                     <button
                         onClick={() => setActiveTab('watched')}
@@ -116,7 +118,7 @@ export default function WatchlistPage() {
                                 : 'bg-white/5 text-gray-400 hover:bg-white/10'
                             }`}
                     >
-                        ✅ İzlediklerim ({watchlistItems.filter(i => i.status === 'watched').length})
+                        ✅ {t('watchlist.watched')} ({watchlistItems.filter(i => i.status === 'watched').length})
                     </button>
                 </section>
 
@@ -128,10 +130,10 @@ export default function WatchlistPage() {
                                 <span className="text-3xl">{activeTab === 'to_watch' ? '📌' : '✅'}</span>
                             </div>
                             <h3 className="text-lg font-semibold text-white mb-1">
-                                {activeTab === 'to_watch' ? 'Henüz İzleyeceğin Film Yok' : 'Henüz İzlediğin Film Yok'}
+                                {activeTab === 'to_watch' ? t('watchlist.noToWatch') : t('watchlist.noWatched')}
                             </h3>
                             <p className="text-gray-400 text-sm">
-                                Film detay sayfasından filmleri listelere ekleyebilirsin.
+                                {t('watchlist.addFromDetail')}
                             </p>
                         </div>
                     ) : (

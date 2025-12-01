@@ -3,7 +3,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 import ThemeToggle from '@/components/ThemeToggle';
+import LanguageToggle from '@/components/LanguageToggle';
 
 interface Film {
   id: number;
@@ -27,6 +29,7 @@ const TMDB_GENRE_MAP: Record<number, string> = {
 };
 
 export default function AdminPage() {
+  const { t } = useLanguage();
   const [user, setUser] = useState<any>(null);
   const [films, setFilms] = useState<Film[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,9 +43,8 @@ export default function AdminPage() {
   const [searchLoading, setSearchLoading] = useState(false);
   const router = useRouter();
 
-  // NOT: Buraya kendi TMDB API anahtarınızı yapıştırın.
-  // Almak için: https://www.themoviedb.org/settings/api
-  const TMDB_API_KEY = 'YOUR_TMDB_API_KEY';
+  // TMDB API Key from environment variables
+  const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || '';
 
   useEffect(() => {
     const getUser = async () => {
@@ -74,8 +76,8 @@ export default function AdminPage() {
       return;
     }
 
-    if (TMDB_API_KEY === 'YOUR_TMDB_API_KEY') {
-      setError('Lütfen kod içindeki TMDB_API_KEY alanına geçerli bir API anahtarı girin.');
+    if (!TMDB_API_KEY) {
+      setError('TMDB API anahtarı bulunamadı. Lütfen .env.local dosyasına NEXT_PUBLIC_TMDB_API_KEY ekleyin.');
       return;
     }
 
