@@ -81,17 +81,25 @@ export default function AdminPage() {
       return;
     }
 
+    console.log('🔍 TMDB Arama başlatıldı:', title);
+    console.log('🔑 API Key:', TMDB_API_KEY ? 'Mevcut' : 'Eksik');
+    
     setSearchLoading(true);
     setError('');
 
     try {
-      const response = await fetch(
-        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=tr-TR`
-      );
+      const url = `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(title)}&language=tr-TR`;
+      console.log('📡 TMDB URL:', url);
+      
+      const response = await fetch(url);
       const data = await response.json();
+      
+      console.log('📦 TMDB Yanıt:', data);
 
       if (data.results && data.results.length > 0) {
         const movie = data.results[0];
+        console.log('🎬 Film bulundu:', movie.title);
+        
         setTitle(movie.title);
         setDescription(movie.overview);
         if (movie.poster_path) {
@@ -107,9 +115,90 @@ export default function AdminPage() {
         setSuccess('Film bilgileri TMDB\'den çekildi!');
       } else {
         setError('Film bulunamadı.');
+        console.log('❌ Sonuç yok');
       }
     } catch (err) {
+      console.error('❌ TMDB Hata:', err);
       setError('TMDB bağlantı hatası.');
+    } finally {
+      setSearchLoading(false);
+    }
+  };
+
+  const handleFetchPopularMovies = async () => {
+    if (!TMDB_API_KEY) {
+      setError('TMDB API anahtarı bulunamadı.');
+      return;
+    }
+
+    setSearchLoading(true);
+    setError('');
+
+    try {
+      console.log('🔥 Popüler filmler çekiliyor...');
+      
+      // Fetch popular movies from TMDB
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/popular?api_key=${TMDB_API_KEY}&language=tr-TR&page=1`
+      );
+      const data = await response.json();
+
+      if (data.results && data.results.length > 0) {
+        console.log(`📦 ${data.results.length} film bulundu`);
+        
+        // Add each movie to database
+        let addedCount = 0;
+        let skippedCount = 0;
+
+        for (const movie of data.results.slice(0, 10)) { // İlk 10 filmi al
+          // Check if movie already exists
+          const { data: existingFilm } = await supabase
+            .from('films')
+            .select('id')
+            .eq('title', movie.title)
+            .single();
+
+          if (existingFilm) {
+            console.log(`⏭️ Zaten var: ${movie.title}`);
+            skippedCount++;
+            continue;
+          }
+
+          // Map genres
+          const mappedGenres = movie.genre_ids
+            ? movie.genre_ids
+                .map((id: number) => TMDB_GENRE_MAP[id])
+                .filter((genre: string | undefined): genre is string => genre !== undefined)
+            : [];
+
+          // Add to database
+          const { error } = await supabase.from('films').insert([
+            {
+              title: movie.title,
+              description: movie.overview || 'Açıklama mevcut değil',
+              poster_url: movie.poster_path
+                ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                : null,
+              genres: mappedGenres,
+            },
+          ]);
+
+          if (!error) {
+            console.log(`✅ Eklendi: ${movie.title}`);
+            addedCount++;
+          } else {
+            console.error(`❌ Hata: ${movie.title}`, error);
+          }
+        }
+
+        setSuccess(`${addedCount} film eklendi, ${skippedCount} film zaten vardı`);
+        await loadFilms();
+      } else {
+        setError('Popüler film bulunamadı.');
+      }
+    } catch (err) {
+      console.error('❌ Popüler filmler hatası:', err);
+      setError('Popüler filmler çekilirken hata oluştu.');
     } finally {
       setSearchLoading(false);
     }
@@ -285,6 +374,14 @@ export default function AdminPage() {
             ⚙️ Admin Paneli
           </h1>
           <div className="flex items-center gap-4">
+            <button
+              onClick={handleFetchPopularMovies}
+              disabled={searchLoading}
+              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              title="TMDB'den popüler filmleri otomatik ekle"
+            >
+              {searchLoading ? '⏳ Yükleniyor...' : '🔥 Popüler Filmler'}
+            </button>
             <a
               href="/dashboard"
               className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"

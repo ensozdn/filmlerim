@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
+import { useLanguage } from '@/context/LanguageContext';
 import DashboardHeader from '@/components/DashboardHeader';
 import FilmCard from '@/components/FilmCard';
 
@@ -30,6 +31,7 @@ export default function ProfilePage() {
     totalComments: 0,
     averageRating: 0,
   });
+  const { t } = useLanguage();
   const router = useRouter();
 
   useEffect(() => {
@@ -135,7 +137,7 @@ export default function ProfilePage() {
               )}
               <div className="flex gap-4 mt-3">
                 <div className="text-sm">
-                  <span className="text-gray-500">Üyelik: </span>
+                  <span className="text-gray-500">{t('profile.membership')} </span>
                   <span className="text-gray-300">
                     {new Date(user?.created_at).toLocaleDateString('tr-TR')}
                   </span>
@@ -153,7 +155,7 @@ export default function ProfilePage() {
                 <span className="text-2xl">❤️</span>
               </div>
               <div>
-                <p className="text-blue-300 text-sm font-medium">Favoriler</p>
+                <p className="text-blue-300 text-sm font-medium">{t('profile.favorites')}</p>
                 <p className="text-3xl font-bold text-white">{stats.totalFavorites}</p>
               </div>
             </div>
@@ -165,7 +167,7 @@ export default function ProfilePage() {
                 <span className="text-2xl">💬</span>
               </div>
               <div>
-                <p className="text-purple-300 text-sm font-medium">Yorumlar</p>
+                <p className="text-purple-300 text-sm font-medium">{t('profile.comments')}</p>
                 <p className="text-3xl font-bold text-white">{stats.totalComments}</p>
               </div>
             </div>
@@ -177,7 +179,7 @@ export default function ProfilePage() {
                 <span className="text-2xl">⭐</span>
               </div>
               <div>
-                <p className="text-yellow-300 text-sm font-medium">Ortalama Puan</p>
+                <p className="text-yellow-300 text-sm font-medium">{t('profile.avgRating')}</p>
                 <p className="text-3xl font-bold text-white">
                   {stats.averageRating > 0 ? stats.averageRating : '-'}
                 </p>
@@ -190,7 +192,7 @@ export default function ProfilePage() {
         <section>
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
             <span className="w-1 h-6 bg-pink-500 rounded-full"></span>
-            Favori Filmlerim
+            {t('profile.myFavorites')}
           </h2>
 
           {favorites.length === 0 ? (
@@ -199,10 +201,10 @@ export default function ProfilePage() {
                 <span className="text-3xl">💔</span>
               </div>
               <h3 className="text-lg font-semibold text-white mb-1">
-                Henüz Favori Film Yok
+                {t('profile.noFavorites')}
               </h3>
               <p className="text-gray-400 text-sm">
-                Beğendiğin filmleri favorilere ekleyerek buradan kolayca erişebilirsin.
+                {t('profile.noFavoritesDesc')}
               </p>
             </div>
           ) : (

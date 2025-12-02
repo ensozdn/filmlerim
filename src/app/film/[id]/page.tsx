@@ -70,15 +70,15 @@ const MOCK_CAST: Record<string, Actor[]> = {
 };
 
 // Helper function for relative time
-function getRelativeTime(dateString: string) {
+function getRelativeTime(dateString: string, t: any) {
   const date = new Date(dateString);
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  if (diffInSeconds < 60) return 'Az önce';
-  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} dakika önce`;
-  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} saat önce`;
-  if (diffInSeconds < 604800) return `${Math.floor(diffInSeconds / 86400)} gün önce`;
+  if (diffInSeconds < 60) return t('film.justNow');
+  if (diffInSeconds < 3600) return t('film.minutesAgo', { count: Math.floor(diffInSeconds / 60) });
+  if (diffInSeconds < 86400) return t('film.hoursAgo', { count: Math.floor(diffInSeconds / 3600) });
+  if (diffInSeconds < 604800) return t('film.daysAgo', { count: Math.floor(diffInSeconds / 86400) });
   return date.toLocaleDateString('tr-TR');
 }
 
@@ -112,7 +112,8 @@ export default function FilmDetailPage() {
   const [rating, setRating] = useState(5);
   const [isFavorite, setIsFavorite] = useState(false);
   const [watchlistStatus, setWatchlistStatus] = useState<'to_watch' | 'watched' | null>(null);
-  const { showToast } = useToast(); // Use toast hook
+  const { showToast } = useToast();
+  const { t } = useLanguage();
   const router = useRouter();
   const params = useParams();
   const filmId = parseInt(params.id as string);
@@ -308,7 +309,7 @@ export default function FilmDetailPage() {
 
       if (error) throw error;
 
-      showToast('Yorum güncellendi', 'success');
+      showToast(t('film.commentUpdated'), 'success');
 
       // Update local state
       setComments(comments.map(c =>
@@ -317,7 +318,7 @@ export default function FilmDetailPage() {
 
       cancelEditing();
     } catch (err) {
-      showToast('Yorum güncellenirken hata oluştu', 'error');
+      showToast(t('film.commentUpdateError'), 'error');
     }
   };
 
@@ -340,7 +341,7 @@ export default function FilmDetailPage() {
 
       setIsFavorite(!isFavorite);
     } catch (err) {
-      showToast('Bir hata oluştu', 'error');
+      showToast(t('film.errorOccurred'), 'error');
     }
   };
 
@@ -372,7 +373,7 @@ export default function FilmDetailPage() {
         }
       }
     } catch (err) {
-      showToast('Bir hata oluştu', 'error');
+      showToast(t('film.errorOccurred'), 'error');
     }
   };
 
@@ -500,7 +501,7 @@ export default function FilmDetailPage() {
                   {'⭐'.repeat(Math.round(Number(averageRating)))}
                 </span>
                 <span className="text-gray-300 text-sm font-semibold">
-                  {averageRating} / 5 • {comments.length} yorum
+                  {t('film.averageRating', { rating: averageRating, count: comments.length })}
                 </span>
               </div>
               <p className="text-gray-300 mb-6 leading-relaxed">{film.description}</p>
@@ -512,7 +513,7 @@ export default function FilmDetailPage() {
                     : 'bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-500 hover:to-pink-600 shadow-lg shadow-pink-500/30'
                     } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
                 >
-                  {isFavorite ? '❤️ Favorilerden Çıkar' : '🤍 Favorilere Ekle'}
+                  {isFavorite ? t('film.removeFromFavorites') : t('film.addToFavorites')}
                 </button>
 
                 <button
@@ -522,7 +523,7 @@ export default function FilmDetailPage() {
                     : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 shadow-lg shadow-gray-500/30'
                     } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
                 >
-                  {watchlistStatus === 'watched' ? '✅ İzledim' : '👁️ İzledim Olarak İşaretle'}
+                  {watchlistStatus === 'watched' ? t('film.watched') : t('film.markAsWatched')}
                 </button>
 
                 <button
@@ -532,7 +533,7 @@ export default function FilmDetailPage() {
                     : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 shadow-lg shadow-gray-500/30'
                     } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
                 >
-                  {watchlistStatus === 'to_watch' ? '📌 İzleme Listemde' : '➕ İzleyeceğim'}
+                  {watchlistStatus === 'to_watch' ? t('film.inWatchlist') : t('film.addToWatchlist')}
                 </button>
               </div>
             </div>
@@ -543,7 +544,7 @@ export default function FilmDetailPage() {
         <div className="mb-12">
           <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
             <span className="w-1 h-6 bg-blue-500 rounded-full"></span>
-            Oyuncular
+            {t('film.cast')}
           </h2>
           <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide snap-x">
             {(MOCK_CAST[film.title] || MOCK_CAST['Default']).map((actor, index) => (
@@ -568,7 +569,7 @@ export default function FilmDetailPage() {
           <div className="mb-12">
             <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
               <span className="w-1 h-6 bg-purple-500 rounded-full"></span>
-              Benzer Filmler
+              {t('film.relatedFilms')}
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {relatedFilms.map((relatedFilm) => (
@@ -582,12 +583,12 @@ export default function FilmDetailPage() {
           {/* Comments Form */}
           <div className="lg:col-span-1">
             <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 sticky top-6 shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 transition-all">
-              <h2 className="text-2xl font-bold text-white mb-6">Yorum Yap</h2>
+              <h2 className="text-2xl font-bold text-white mb-6">{t('film.addComment')}</h2>
 
               <form onSubmit={handleAddComment} className="space-y-4">
                 <div>
                   <label className="block text-gray-300 text-sm font-medium mb-2">
-                    Puanla (1-5)
+                    {t('film.rating')}
                   </label>
                   <select
                     value={rating}
@@ -604,13 +605,13 @@ export default function FilmDetailPage() {
 
                 <div>
                   <label className="block text-gray-300 text-sm font-medium mb-2">
-                    Yorumunuz
+                    {t('film.yourComment')}
                   </label>
                   <textarea
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
-                    placeholder="Filmi nasıl buldunuz?"
+                    placeholder={t('film.commentPlaceholder')}
                     rows={4}
                   />
                 </div>
@@ -620,7 +621,7 @@ export default function FilmDetailPage() {
                   disabled={submitting}
                   className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-semibold py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                 >
-                  {submitting ? 'Gönderiliyor...' : 'Gönder'}
+                  {submitting ? t('film.sending') : t('film.send')}
                 </button>
               </form>
             </div>
@@ -629,11 +630,11 @@ export default function FilmDetailPage() {
           {/* Comments List */}
           <div className="lg:col-span-2">
             <h2 className="text-2xl font-bold text-white mb-6">
-              Yorumlar ({comments.length})
+              {t('film.commentsCount', { count: comments.length })}
             </h2>
             {comments.length === 0 ? (
               <p className="text-gray-400 text-center py-8">
-                Henüz yorum yapılmamış. İlk yorumu siz yapın!
+                {t('film.noComments')}
               </p>
             ) : (
               <div className="space-y-4">
@@ -659,7 +660,7 @@ export default function FilmDetailPage() {
                             </p>
                             <span className="text-gray-600 text-xs">•</span>
                             <p className="text-gray-500 text-xs">
-                              {getRelativeTime(comment.created_at)}
+                              {getRelativeTime(comment.created_at, t)}
                             </p>
                           </div>
                         </div>
@@ -670,7 +671,7 @@ export default function FilmDetailPage() {
                           <button
                             onClick={() => startEditing(comment)}
                             className="text-gray-500 hover:text-blue-400 transition-colors p-1 hover:bg-white/5 rounded-lg"
-                            title="Yorumu Düzenle"
+                            title={t('film.editComment')}
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -679,7 +680,7 @@ export default function FilmDetailPage() {
                           <button
                             onClick={() => handleDeleteComment(comment.id)}
                             className="text-gray-500 hover:text-red-400 transition-colors p-1 hover:bg-white/5 rounded-lg"
-                            title="Yorumu Sil"
+                            title={t('film.deleteComment')}
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -702,13 +703,13 @@ export default function FilmDetailPage() {
                             onClick={cancelEditing}
                             className="px-3 py-1 text-sm text-gray-400 hover:text-white transition-colors"
                           >
-                            İptal
+                            {t('film.cancelEdit')}
                           </button>
                           <button
                             onClick={() => handleUpdateComment(comment.id)}
                             className="px-3 py-1 text-sm bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
                           >
-                            Kaydet
+                            {t('film.saveComment')}
                           </button>
                         </div>
                       </div>
