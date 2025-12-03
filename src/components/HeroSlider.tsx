@@ -54,7 +54,7 @@ export default function HeroSlider({ films }: HeroSliderProps) {
     const currentFilm = films[currentIndex];
 
     return (
-        <div className="relative w-full h-[70vh] min-h-[500px] overflow-hidden group">
+        <div className="relative w-full h-[50vh] md:h-[60vh] lg:h-[70vh] min-h-[400px] md:min-h-[500px] overflow-hidden group">
             {/* Background Image with Fade Transition */}
             <div
                 className={`absolute inset-0 transition-opacity duration-500 ease-in-out ${isAnimating ? 'opacity-0' : 'opacity-100'}`}
@@ -74,29 +74,29 @@ export default function HeroSlider({ films }: HeroSliderProps) {
             </div>
 
             {/* Content */}
-            <div className={`relative z-10 h-full max-w-7xl mx-auto px-6 flex flex-col justify-center transition-all duration-500 ${isAnimating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
-                <div className="max-w-2xl space-y-6">
-                    <h1 className="text-5xl md:text-7xl font-bold text-white leading-tight drop-shadow-lg">
+            <div className={`relative z-10 h-full max-w-7xl mx-auto px-4 md:px-6 flex flex-col justify-center transition-all duration-500 ${isAnimating ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'}`}>
+                <div className="max-w-2xl space-y-3 md:space-y-6">
+                    <h1 className="text-3xl md:text-5xl lg:text-7xl font-bold text-white leading-tight drop-shadow-lg">
                         {currentFilm.title}
                     </h1>
 
-                    <div className="flex items-center gap-4 text-sm md:text-base">
+                    <div className="flex items-center gap-2 md:gap-4 text-xs md:text-sm lg:text-base">
                         <div className="flex items-center gap-1 bg-yellow-500/20 px-2 py-1 rounded text-yellow-400 border border-yellow-500/30">
                             <span>★</span>
                             <span className="font-bold">{currentFilm.rating || '7.8'}</span>
                         </div>
                         <span className="text-gray-300">{currentFilm.year || '2024'}</span>
                         <span className="text-gray-300">•</span>
-                        <span className="text-gray-300">Bilim Kurgu</span>
+                        <span className="text-gray-300 hidden sm:inline">Bilim Kurgu</span>
                     </div>
 
-                    <p className="text-lg text-gray-200 line-clamp-3 drop-shadow-md max-w-xl">
+                    <p className="text-sm md:text-base lg:text-lg text-gray-200 line-clamp-2 md:line-clamp-3 drop-shadow-md max-w-xl">
                         {currentFilm.description}
                     </p>
 
-                    <div className="flex flex-wrap gap-4 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2 md:pt-4">
                         <button
-                            className="px-8 py-3.5 bg-white text-black rounded-xl font-bold flex items-center gap-2 hover:bg-gray-200 transition-all transform hover:scale-105 shadow-lg shadow-white/10"
+                            className="px-6 md:px-8 py-3 md:py-3.5 bg-white text-black rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-200 transition-all transform hover:scale-105 shadow-lg shadow-white/10 text-sm md:text-base"
                         >
                             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z" />
@@ -106,7 +106,7 @@ export default function HeroSlider({ films }: HeroSliderProps) {
 
                         <button
                             onClick={() => router.push(`/film/${currentFilm.id}`)}
-                            className="px-8 py-3.5 bg-gray-600/40 backdrop-blur-md text-white border border-white/20 rounded-xl font-bold flex items-center gap-2 hover:bg-gray-600/60 transition-all transform hover:scale-105"
+                            className="px-6 md:px-8 py-3 md:py-3.5 bg-gray-600/40 backdrop-blur-md text-white border border-white/20 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-600/60 transition-all transform hover:scale-105 text-sm md:text-base"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

@@ -482,36 +482,36 @@ export default function FilmDetailPage() {
     <div className="min-h-screen bg-[#0a0e27] text-white">
       <DashboardHeader userEmail={user?.email} isAdmin={isAdmin} />
 
-      <main className="max-w-7xl mx-auto p-6">
+      <main className="max-w-7xl mx-auto p-4 md:p-6">
         {/* Film Info */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-8 border border-gray-700 mb-8 shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 transition-all">
-          <div className="flex gap-8">
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl md:rounded-2xl p-4 md:p-8 border border-gray-700 mb-6 md:mb-8 shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 transition-all">
+          <div className="flex flex-col md:flex-row gap-4 md:gap-8">
             {film.poster_url && (
               <img
                 src={film.poster_url}
                 alt={film.title}
                 onError={handleImageError}
-                className="w-48 h-64 object-cover rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 transition-all"
+                className="w-full md:w-48 h-auto md:h-64 object-cover rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/20 transition-all"
               />
             )}
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-white mb-2">{film.title}</h1>
-              <div className="flex items-center gap-3 mb-4 bg-gray-700/30 px-4 py-2 rounded-lg w-fit">
-                <span className="text-yellow-400 text-lg">
+              <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">{film.title}</h1>
+              <div className="flex items-center gap-2 md:gap-3 mb-3 md:mb-4 bg-gray-700/30 px-3 md:px-4 py-2 rounded-lg w-fit">
+                <span className="text-yellow-400 text-base md:text-lg">
                   {'⭐'.repeat(Math.round(Number(averageRating)))}
                 </span>
-                <span className="text-gray-300 text-sm font-semibold">
+                <span className="text-gray-300 text-xs md:text-sm font-semibold">
                   {t('film.averageRating', { rating: averageRating, count: comments.length })}
                 </span>
               </div>
-              <p className="text-gray-300 mb-6 leading-relaxed">{film.description}</p>
-              <div className="flex flex-wrap gap-3">
+              <p className="text-gray-300 mb-4 md:mb-6 leading-relaxed text-sm md:text-base">{film.description}</p>
+              <div className="flex flex-col sm:flex-row flex-wrap gap-2 md:gap-3">
                 <button
                   onClick={toggleFavorite}
                   className={`${isFavorite
                     ? 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 shadow-lg shadow-red-500/30'
                     : 'bg-gradient-to-r from-pink-600 to-pink-700 hover:from-pink-500 hover:to-pink-600 shadow-lg shadow-pink-500/30'
-                    } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
+                    } text-white px-4 md:px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold text-sm md:text-base w-full sm:w-auto text-center`}
                 >
                   {isFavorite ? t('film.removeFromFavorites') : t('film.addToFavorites')}
                 </button>
@@ -521,7 +521,7 @@ export default function FilmDetailPage() {
                   className={`${watchlistStatus === 'watched'
                     ? 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 shadow-lg shadow-green-500/30'
                     : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 shadow-lg shadow-gray-500/30'
-                    } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
+                    } text-white px-4 md:px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold text-sm md:text-base w-full sm:w-auto text-center`}
                 >
                   {watchlistStatus === 'watched' ? t('film.watched') : t('film.markAsWatched')}
                 </button>
@@ -531,7 +531,7 @@ export default function FilmDetailPage() {
                   className={`${watchlistStatus === 'to_watch'
                     ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 shadow-lg shadow-blue-500/30'
                     : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 shadow-lg shadow-gray-500/30'
-                    } text-white px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold`}
+                    } text-white px-4 md:px-6 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold text-sm md:text-base w-full sm:w-auto text-center`}
                 >
                   {watchlistStatus === 'to_watch' ? t('film.inWatchlist') : t('film.addToWatchlist')}
                 </button>
@@ -541,15 +541,15 @@ export default function FilmDetailPage() {
         </div>
 
         {/* Cast Section */}
-        <div className="mb-12">
-          <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+        <div className="mb-8 md:mb-12">
+          <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center gap-2">
             <span className="w-1 h-6 bg-blue-500 rounded-full"></span>
             {t('film.cast')}
           </h2>
-          <div className="flex gap-6 overflow-x-auto pb-6 scrollbar-hide snap-x">
+          <div className="flex gap-4 md:gap-6 overflow-x-auto pb-6 scrollbar-hide snap-x">
             {(MOCK_CAST[film.title] || MOCK_CAST['Default']).map((actor, index) => (
-              <div key={index} className="min-w-[140px] snap-start group">
-                <div className="w-32 h-32 md:w-40 md:h-40 mb-3 overflow-hidden rounded-full border-2 border-white/10 group-hover:border-blue-500/50 transition-all shadow-lg">
+              <div key={index} className="min-w-[120px] md:min-w-[140px] snap-start group">
+                <div className="w-28 h-28 md:w-32 md:h-32 lg:w-40 lg:h-40 mb-2 md:mb-3 overflow-hidden rounded-full border-2 border-white/10 group-hover:border-blue-500/50 transition-all shadow-lg">
                   <img
                     src={actor.image_url}
                     alt={actor.name}
@@ -557,7 +557,7 @@ export default function FilmDetailPage() {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
-                <h3 className="text-white font-medium text-center truncate px-1 group-hover:text-blue-400 transition-colors">{actor.name}</h3>
+                <h3 className="text-white font-medium text-center text-sm md:text-base truncate px-1 group-hover:text-blue-400 transition-colors">{actor.name}</h3>
                 <p className="text-gray-500 text-xs text-center truncate px-1">{actor.role}</p>
               </div>
             ))}
@@ -566,12 +566,12 @@ export default function FilmDetailPage() {
 
         {/* Related Films */}
         {relatedFilms.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+          <div className="mb-8 md:mb-12">
+            <h2 className="text-xl md:text-2xl font-bold text-white mb-4 md:mb-6 flex items-center gap-2">
               <span className="w-1 h-6 bg-purple-500 rounded-full"></span>
               {t('film.relatedFilms')}
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
               {relatedFilms.map((relatedFilm) => (
                 <FilmCard key={relatedFilm.id} film={relatedFilm} />
               ))}

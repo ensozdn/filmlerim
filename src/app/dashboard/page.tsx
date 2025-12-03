@@ -163,17 +163,17 @@ export default function DashboardPage() {
       {/* Hero Slider Section */}
       {films.length > 0 && <HeroSlider films={films.slice(0, 5)} />}
 
-      <main className="max-w-7xl mx-auto p-6 lg:p-8 space-y-12">
+      <main className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8 space-y-8 md:space-y-12">
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-[#1a1f35] p-6 rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="text-6xl">🎬</span>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+          <div className="bg-[#1a1f35] p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="absolute top-0 right-0 p-2 md:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <span className="text-4xl md:text-6xl">🎬</span>
             </div>
-            <h3 className="text-gray-400 text-sm font-medium mb-1">{t('dashboard.totalFilms')}</h3>
-            <p className="text-3xl font-bold text-white">{films.length}</p>
-            <div className="mt-4 flex items-center text-xs text-green-400">
+            <h3 className="text-gray-400 text-xs md:text-sm font-medium mb-1">{t('dashboard.totalFilms')}</h3>
+            <p className="text-2xl md:text-3xl font-bold text-white">{films.length}</p>
+            <div className="mt-2 md:mt-4 flex items-center text-xs text-green-400">
               <span className="flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -183,15 +183,15 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-[#1a1f35] p-6 rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="text-6xl">💬</span>
+          <div className="bg-[#1a1f35] p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="absolute top-0 right-0 p-2 md:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <span className="text-4xl md:text-6xl">💬</span>
             </div>
-            <h3 className="text-gray-400 text-sm font-medium mb-1">{t('dashboard.totalComments')}</h3>
-            <p className="text-3xl font-bold text-white">
+            <h3 className="text-gray-400 text-xs md:text-sm font-medium mb-1">{t('dashboard.totalComments')}</h3>
+            <p className="text-2xl md:text-3xl font-bold text-white">
               {films.reduce((acc, film: any) => acc + (film.comment_count || 0), 0)}
             </p>
-            <div className="mt-4 flex items-center text-xs text-blue-400">
+            <div className="mt-2 md:mt-4 flex items-center text-xs text-blue-400">
               <span className="flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
@@ -201,15 +201,15 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-[#1a1f35] p-6 rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="text-6xl">⭐</span>
+          <div className="bg-[#1a1f35] p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="absolute top-0 right-0 p-2 md:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <span className="text-4xl md:text-6xl">⭐</span>
             </div>
-            <h3 className="text-gray-400 text-sm font-medium mb-1">{t('dashboard.avgRating')}</h3>
-            <p className="text-3xl font-bold text-white">
+            <h3 className="text-gray-400 text-xs md:text-sm font-medium mb-1">{t('dashboard.avgRating')}</h3>
+            <p className="text-2xl md:text-3xl font-bold text-white">
               {(films.reduce((acc, film: any) => acc + (film.average_rating || 0), 0) / (films.length || 1)).toFixed(1)}
             </p>
-            <div className="mt-4 flex items-center text-xs text-yellow-400">
+            <div className="mt-2 md:mt-4 flex items-center text-xs text-yellow-400">
               <span className="flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -219,12 +219,12 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-[#1a1f35] p-6 rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-              <span className="text-6xl">🎭</span>
+          <div className="bg-[#1a1f35] p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+            <div className="absolute top-0 right-0 p-2 md:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <span className="text-4xl md:text-6xl">🎭</span>
             </div>
-            <h3 className="text-gray-400 text-sm font-medium mb-1">{t('dashboard.topGenre')}</h3>
-            <p className="text-3xl font-bold text-white truncate">
+            <h3 className="text-gray-400 text-xs md:text-sm font-medium mb-1">{t('dashboard.topGenre')}</h3>
+            <p className="text-2xl md:text-3xl font-bold text-white truncate">
               {(() => {
                 const genreCounts: Record<string, number> = {};
                 films.forEach((film: any) => {
@@ -236,7 +236,7 @@ export default function DashboardPage() {
                 return topGenre ? topGenre[0] : '-';
               })()}
             </p>
-            <div className="mt-4 flex items-center text-xs text-purple-400">
+            <div className="mt-2 md:mt-4 flex items-center text-xs text-purple-400">
               <span className="flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
@@ -326,7 +326,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6 mb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6 mb-12">
                 {paginatedFilms.map((film) => (
                   <FilmCard key={film.id} film={film} />
                 ))}
@@ -334,23 +334,23 @@ export default function DashboardPage() {
 
               {/* Pagination */}
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-3 border-t border-white/5 pt-8">
+                <div className="flex justify-center items-center gap-2 md:gap-3 border-t border-white/5 pt-6 md:pt-8">
                   <button
                     onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
                     disabled={currentPage === 1}
-                    className="p-2.5 rounded-lg bg-[#1a1f35] border border-white/5 text-white hover:bg-blue-600 hover:border-blue-500 disabled:opacity-50 disabled:hover:bg-[#1a1f35] disabled:cursor-not-allowed transition-all"
+                    className="p-2 md:p-2.5 rounded-lg bg-[#1a1f35] border border-white/5 text-white hover:bg-blue-600 hover:border-blue-500 disabled:opacity-50 disabled:hover:bg-[#1a1f35] disabled:cursor-not-allowed transition-all"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
 
-                  <div className="flex gap-2">
+                  <div className="flex gap-1 md:gap-2">
                     {[...Array(totalPages)].map((_, i) => (
                       <button
                         key={i + 1}
                         onClick={() => handlePageChange(i + 1)}
-                        className={`w-10 h-10 rounded-lg font-medium transition-all ${currentPage === i + 1
+                        className={`w-8 h-8 md:w-10 md:h-10 rounded-lg font-medium text-sm md:text-base transition-all ${currentPage === i + 1
                           ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20'
                           : 'bg-[#1a1f35] border border-white/5 text-gray-400 hover:bg-[#1f2937] hover:text-white'
                           }`}
@@ -363,9 +363,9 @@ export default function DashboardPage() {
                   <button
                     onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
                     disabled={currentPage === totalPages}
-                    className="p-2.5 rounded-lg bg-[#1a1f35] border border-white/5 text-white hover:bg-blue-600 hover:border-blue-500 disabled:opacity-50 disabled:hover:bg-[#1a1f35] disabled:cursor-not-allowed transition-all"
+                    className="p-2 md:p-2.5 rounded-lg bg-[#1a1f35] border border-white/5 text-white hover:bg-blue-600 hover:border-blue-500 disabled:opacity-50 disabled:hover:bg-[#1a1f35] disabled:cursor-not-allowed transition-all"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                     </svg>
                   </button>

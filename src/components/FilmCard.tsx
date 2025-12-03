@@ -21,7 +21,7 @@ export default function FilmCard({ film }: FilmCardProps) {
 
     return (
         <div
-            className="group relative bg-[#1a1f35] rounded-2xl overflow-hidden border border-white/5 hover:border-blue-500/30 transition-all duration-500 cursor-pointer hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1"
+            className="group relative bg-[#1a1f35] rounded-xl md:rounded-2xl overflow-hidden border border-white/5 hover:border-blue-500/30 transition-all duration-500 cursor-pointer hover:shadow-2xl hover:shadow-blue-500/10 hover:-translate-y-1 active:scale-95"
             onClick={() => router.push(`/film/${film.id}`)}
         >
             {/* Image Container */}
@@ -43,8 +43,8 @@ export default function FilmCard({ film }: FilmCardProps) {
 
                 {/* Rating Badge */}
                 {film.average_rating && film.average_rating > 0 && (
-                    <div className="absolute top-3 right-3 bg-yellow-500/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg">
-                        <svg className="w-4 h-4 text-yellow-900" fill="currentColor" viewBox="0 0 20 20">
+                    <div className="absolute top-2 right-2 md:top-3 md:right-3 bg-yellow-500/90 backdrop-blur-sm px-2 py-1 rounded-lg flex items-center gap-1 shadow-lg">
+                        <svg className="w-3 h-3 md:w-4 md:h-4 text-yellow-900" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                         </svg>
                         <span className="text-xs font-bold text-yellow-900">{film.average_rating.toFixed(1)}</span>
@@ -56,11 +56,11 @@ export default function FilmCard({ film }: FilmCardProps) {
             </div>
 
             {/* Content */}
-            <div className="absolute bottom-0 left-0 right-0 p-5 translate-y-2 group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-[#1a1f35] via-[#1a1f35]/95 to-transparent">
-                <h3 className="text-white font-bold text-lg truncate group-hover:text-blue-400 transition-colors duration-300">
+            <div className="absolute bottom-0 left-0 right-0 p-3 md:p-5 translate-y-2 group-hover:translate-y-0 transition-transform duration-500 bg-gradient-to-t from-[#1a1f35] via-[#1a1f35]/95 to-transparent">
+                <h3 className="text-white font-bold text-base md:text-lg truncate group-hover:text-blue-400 transition-colors duration-300">
                     {film.title}
                 </h3>
-                <p className="text-gray-400 text-sm line-clamp-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-75">
+                <p className="text-gray-400 text-xs md:text-sm line-clamp-2 mt-1 md:mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-75">
                     {film.description}
                 </p>
 
