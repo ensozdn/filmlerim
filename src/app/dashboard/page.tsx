@@ -61,63 +61,77 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        router.push('/login');
-        return;
-      }
-
-      setUser(user);
-
-      // Admin kontrolü
       try {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('role')
-          .eq('id', user.id)
-          .single();
+        const {
+          data: { user },
+          error: authError,
+        } = await supabase.auth.getUser();
 
-        setIsAdmin(profileData?.role === 'admin');
-      } catch (err) {
-        console.error('Profile fetch error:', err);
+        // Handle auth errors
+        if (authError) {
+          console.error('Auth error:', authError);
+          await supabase.auth.signOut();
+          router.push('/login');
+          return;
+        }
+
+        if (!user) {
+          router.push('/login');
+          return;
+        }
+
+        setUser(user);
+
+        // Admin kontrolü
+        try {
+          const { data: profileData } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+          setIsAdmin(profileData?.role === 'admin');
+        } catch (err) {
+          console.error('Profile fetch error:', err);
+        }
+
+        // Fetch all films
+        const { data: filmsData } = await supabase
+          .from('films')
+          .select('*')
+          .order('title');
+
+        // Fetch all comments separately to avoid duplicates
+        const { data: commentsData } = await supabase
+          .from('comments')
+          .select('film_id, rating');
+
+        // Remove duplicate films by ID (just in case)
+        const uniqueFilms = Array.from(
+          new Map((filmsData || []).map((film: any) => [film.id, film])).values()
+        );
+
+        // Calculate average ratings per film
+        const filmsWithRatings = uniqueFilms.map((film: any) => {
+          const filmComments = (commentsData || []).filter((c: any) => c.film_id === film.id);
+          const ratings = filmComments.map((c: any) => c.rating);
+          const avgRating = ratings.length > 0
+            ? ratings.reduce((sum: number, r: number) => sum + r, 0) / ratings.length
+            : 0;
+
+          return {
+            ...film,
+            average_rating: avgRating,
+            comment_count: ratings.length
+          };
+        });
+
+        setFilms(filmsWithRatings);
+        setLoading(false);
+      } catch (error) {
+        console.error('Unexpected error:', error);
+        router.push('/login');
       }
-
-      // Fetch all films
-      const { data: filmsData } = await supabase
-        .from('films')
-        .select('*')
-        .order('title');
-
-      // Fetch all comments separately to avoid duplicates
-      const { data: commentsData } = await supabase
-        .from('comments')
-        .select('film_id, rating');
-
-      // Remove duplicate films by ID (just in case)
-      const uniqueFilms = Array.from(
-        new Map((filmsData || []).map((film: any) => [film.id, film])).values()
-      );
-
-      // Calculate average ratings per film
-      const filmsWithRatings = uniqueFilms.map((film: any) => {
-        const filmComments = (commentsData || []).filter((c: any) => c.film_id === film.id);
-        const ratings = filmComments.map((c: any) => c.rating);
-        const avgRating = ratings.length > 0
-          ? ratings.reduce((sum: number, r: number) => sum + r, 0) / ratings.length
-          : 0;
-
-        return {
-          ...film,
-          average_rating: avgRating,
-          comment_count: ratings.length
-        };
-      });
-
-      setFilms(filmsWithRatings);
-      setLoading(false);
     };
 
     getUser();
