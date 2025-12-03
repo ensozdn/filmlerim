@@ -36,7 +36,7 @@ export default function FilmCarousel({ title, films }: FilmCarouselProps) {
     if (films.length === 0) return null;
 
     return (
-        <div className="py-8 relative group/carousel">
+        <div className="py-8">
             <div className="flex justify-between items-center mb-6 px-2">
                 <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                     <span className="w-1 h-6 bg-blue-500 rounded-full"></span>
@@ -62,21 +62,24 @@ export default function FilmCarousel({ title, films }: FilmCarouselProps) {
                 </div>
             </div>
 
-            <div
-                ref={scrollContainerRef}
-                className="flex gap-5 overflow-x-auto pb-8 px-2 scrollbar-hide snap-x snap-mandatory"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-            >
-                {films.map((film) => (
-                    <div key={film.id} className="min-w-[200px] md:min-w-[240px] snap-start">
-                        <FilmCard film={film} />
-                    </div>
-                ))}
-            </div>
+            {/* Scroll Container with Fade Effects */}
+            <div className="relative">
+                <div
+                    ref={scrollContainerRef}
+                    className="flex gap-5 overflow-x-auto pb-8 px-2 scrollbar-hide snap-x snap-mandatory"
+                    style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                >
+                    {films.map((film) => (
+                        <div key={film.id} className="min-w-[200px] md:min-w-[240px] snap-start">
+                            <FilmCard film={film} />
+                        </div>
+                    ))}
+                </div>
 
-            {/* Fade effects on sides */}
-            <div className="absolute top-0 bottom-0 left-0 w-12 bg-gradient-to-r from-[#0a0e27] to-transparent pointer-events-none z-10"></div>
-            <div className="absolute top-0 bottom-0 right-0 w-12 bg-gradient-to-l from-[#0a0e27] to-transparent pointer-events-none z-10"></div>
+                {/* Fade effects on sides - Only on scroll area */}
+                <div className="absolute top-0 bottom-0 left-0 w-12 bg-gradient-to-r from-[#0a0e27] to-transparent pointer-events-none z-10"></div>
+                <div className="absolute top-0 bottom-0 right-0 w-12 bg-gradient-to-l from-[#0a0e27] to-transparent pointer-events-none z-10"></div>
+            </div>
         </div>
     );
 }
