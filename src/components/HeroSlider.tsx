@@ -20,6 +20,10 @@ export default function HeroSlider({ films }: HeroSliderProps) {
     const router = useRouter();
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
+    const [trailerKey, setTrailerKey] = useState<string | null>(null);
+    const [showTrailer, setShowTrailer] = useState(false);
+
+    const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || '';
 
     useEffect(() => {
         if (films.length <= 1) return;
@@ -47,6 +51,42 @@ export default function HeroSlider({ films }: HeroSliderProps) {
             setCurrentIndex(index);
             setIsAnimating(false);
         }, 500);
+    };
+
+    const fetchTrailer = async (filmTitle: string) => {
+        if (!TMDB_API_KEY) {
+            console.error('TMDB API Key is missing');
+            return;
+        }
+        
+        try {
+            const searchResponse = await fetch(
+                `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(filmTitle)}&language=tr-TR`
+            );
+            const searchData = await searchResponse.json();
+            
+            if (searchData.results && searchData.results.length > 0) {
+                const movieId = searchData.results[0].id;
+                
+                const videosResponse = await fetch(
+                    `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${TMDB_API_KEY}&language=tr-TR`
+                );
+                const videosData = await videosResponse.json();
+                
+                const trailer = videosData.results?.find(
+                    (video: any) => video.type === 'Trailer' && video.site === 'YouTube'
+                );
+                
+                if (trailer) {
+                    setTrailerKey(trailer.key);
+                    setShowTrailer(true);
+                } else {
+                    console.log('No trailer found');
+                }
+            }
+        } catch (error) {
+            console.error('Trailer fetch error:', error);
+        }
     };
 
     if (!films || films.length === 0) return null;
@@ -96,6 +136,7 @@ export default function HeroSlider({ films }: HeroSliderProps) {
 
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2 md:pt-4">
                         <button
+                            onClick={() => fetchTrailer(currentFilm.title)}
                             className="px-6 md:px-8 py-3 md:py-3.5 bg-white text-black rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-200 transition-all transform hover:scale-105 shadow-lg shadow-white/10 text-sm md:text-base"
                         >
                             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -131,6 +172,36 @@ export default function HeroSlider({ films }: HeroSliderProps) {
                     />
                 ))}
             </div>
+
+            {/* Trailer Modal */}
+            {showTrailer && trailerKey && (
+                <div 
+                    className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-fadeIn"
+                    onClick={() => setShowTrailer(false)}
+                >
+                    <div 
+                        className="relative w-full max-w-5xl aspect-video"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <button
+                            onClick={() => setShowTrailer(false)}
+                            className="absolute -top-12 right-0 text-white hover:text-red-500 transition-colors"
+                        >
+                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        
+                        <iframe
+                            className="w-full h-full rounded-xl shadow-2xl"
+                            src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+                            title="Film Trailer"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        />
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
