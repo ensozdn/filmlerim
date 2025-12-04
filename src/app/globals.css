@@ -288,3 +288,19 @@ html.light-mode .skeleton {
 .animate-slide-in {
   animation: slide-in 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
+
+/* Star Pulse Animation */
+@keyframes pulse-star {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 2px rgba(251, 191, 36, 0.5));
+  }
+  50% {
+    transform: scale(1.05);
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
+  }
+}
+
+.animate-pulse-star {
+  animation: pulse-star 1.5s ease-in-out infinite;
+}

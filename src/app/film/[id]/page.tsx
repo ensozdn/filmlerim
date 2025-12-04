@@ -7,6 +7,7 @@ import { useToast } from '@/context/ToastContext';
 import { useLanguage } from '@/context/LanguageContext';
 import DashboardHeader from '@/components/DashboardHeader';
 import FilmCard from '@/components/FilmCard';
+import StarRating from '@/components/StarRating';
 
 interface Film {
   id: number;
@@ -659,20 +660,14 @@ export default function FilmDetailPage() {
 
               <form onSubmit={handleAddComment} className="space-y-4">
                 <div>
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                  <label className="block text-gray-300 text-sm font-medium mb-4">
                     {t('film.rating')}
                   </label>
-                  <select
-                    value={rating}
-                    onChange={(e) => setRating(parseInt(e.target.value))}
-                    className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                  >
-                    {[5, 4, 3, 2, 1].map((r) => (
-                      <option key={r} value={r}>
-                        {'⭐'.repeat(r)} {r}/5
-                      </option>
-                    ))}
-                  </select>
+                  <StarRating 
+                    rating={rating} 
+                    onRatingChange={setRating}
+                    size="md"
+                  />
                 </div>
 
                 <div>
