@@ -112,11 +112,15 @@ export default function FilmDetailPage() {
   const [rating, setRating] = useState(5);
   const [isFavorite, setIsFavorite] = useState(false);
   const [watchlistStatus, setWatchlistStatus] = useState<'to_watch' | 'watched' | null>(null);
+  const [trailerKey, setTrailerKey] = useState<string | null>(null);
+  const [showTrailer, setShowTrailer] = useState(false);
   const { showToast } = useToast();
   const { t } = useLanguage();
   const router = useRouter();
   const params = useParams();
   const filmId = parseInt(params.id as string);
+
+  const TMDB_API_KEY = process.env.NEXT_PUBLIC_TMDB_API_KEY || '';
 
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
     e.currentTarget.src = 'https://via.placeholder.com/200x300?text=No+Image';
@@ -127,6 +131,40 @@ export default function FilmDetailPage() {
   const averageRating = comments.length > 0
     ? (comments.reduce((acc, comment) => acc + comment.rating, 0) / comments.length).toFixed(1)
     : 'N/A';
+
+  // Fetch trailer from TMDB
+  const fetchTrailer = async (filmTitle: string) => {
+    if (!TMDB_API_KEY) return;
+    
+    try {
+      // Search for movie
+      const searchResponse = await fetch(
+        `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(filmTitle)}&language=tr-TR`
+      );
+      const searchData = await searchResponse.json();
+      
+      if (searchData.results && searchData.results.length > 0) {
+        const movieId = searchData.results[0].id;
+        
+        // Get videos
+        const videosResponse = await fetch(
+          `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${TMDB_API_KEY}&language=tr-TR`
+        );
+        const videosData = await videosResponse.json();
+        
+        // Find trailer
+        const trailer = videosData.results?.find(
+          (video: any) => video.type === 'Trailer' && video.site === 'YouTube'
+        );
+        
+        if (trailer) {
+          setTrailerKey(trailer.key);
+        }
+      }
+    } catch (error) {
+      console.error('Trailer fetch error:', error);
+    }
+  };
 
   const fetchFilmDetails = async () => {
     setLoading(true);
@@ -196,6 +234,11 @@ export default function FilmDetailPage() {
           .eq('film_id', filmId)
           .single();
         setWatchlistStatus(watchlistData?.status || null);
+      }
+      
+      // Fetch trailer
+      if (filmData.title) {
+        fetchTrailer(filmData.title);
       }
     } catch (error: any) {
       console.error('Error fetching film details:', error.message);
@@ -505,6 +548,20 @@ export default function FilmDetailPage() {
                 </span>
               </div>
               <p className="text-gray-300 mb-4 md:mb-6 leading-relaxed text-sm md:text-base">{film.description}</p>
+              
+              {/* Trailer Button */}
+              {trailerKey && (
+                <button
+                  onClick={() => setShowTrailer(true)}
+                  className="mb-4 px-4 md:px-6 py-2 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white rounded-lg transition-all duration-300 transform hover:scale-105 font-semibold text-sm md:text-base flex items-center gap-2 shadow-lg shadow-red-500/30"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                  🎬 Fragman İzle
+                </button>
+              )}
+              
               <div className="flex flex-col sm:flex-row flex-wrap gap-2 md:gap-3">
                 <button
                   onClick={toggleFavorite}
@@ -736,6 +793,38 @@ export default function FilmDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Trailer Modal */}
+      {showTrailer && trailerKey && (
+        <div 
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4 animate-fadeIn"
+          onClick={() => setShowTrailer(false)}
+        >
+          <div 
+            className="relative w-full max-w-5xl aspect-video"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setShowTrailer(false)}
+              className="absolute -top-12 right-0 text-white hover:text-red-500 transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            {/* YouTube Embed */}
+            <iframe
+              className="w-full h-full rounded-xl shadow-2xl"
+              src={`https://www.youtube.com/embed/${trailerKey}?autoplay=1`}
+              title="Film Trailer"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
