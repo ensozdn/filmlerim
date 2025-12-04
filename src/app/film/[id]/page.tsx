@@ -134,23 +134,33 @@ export default function FilmDetailPage() {
 
   // Fetch trailer from TMDB
   const fetchTrailer = async (filmTitle: string) => {
-    if (!TMDB_API_KEY) return;
+    console.log('🎬 Fetching trailer for:', filmTitle);
+    console.log('🔑 TMDB API Key:', TMDB_API_KEY ? 'Exists' : 'Missing');
+    
+    if (!TMDB_API_KEY) {
+      console.error('❌ TMDB API Key is missing!');
+      return;
+    }
     
     try {
       // Search for movie
+      console.log('🔍 Searching movie...');
       const searchResponse = await fetch(
         `https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(filmTitle)}&language=tr-TR`
       );
       const searchData = await searchResponse.json();
+      console.log('📦 Search results:', searchData);
       
       if (searchData.results && searchData.results.length > 0) {
         const movieId = searchData.results[0].id;
+        console.log('🎥 Movie ID:', movieId);
         
         // Get videos
         const videosResponse = await fetch(
           `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${TMDB_API_KEY}&language=tr-TR`
         );
         const videosData = await videosResponse.json();
+        console.log('🎞️ Videos data:', videosData);
         
         // Find trailer
         const trailer = videosData.results?.find(
@@ -158,11 +168,16 @@ export default function FilmDetailPage() {
         );
         
         if (trailer) {
+          console.log('✅ Trailer found:', trailer.key);
           setTrailerKey(trailer.key);
+        } else {
+          console.log('⚠️ No trailer found');
         }
+      } else {
+        console.log('⚠️ No search results');
       }
     } catch (error) {
-      console.error('Trailer fetch error:', error);
+      console.error('❌ Trailer fetch error:', error);
     }
   };
 
