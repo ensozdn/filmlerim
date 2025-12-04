@@ -67,49 +67,49 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-black from-gray-100 via-gray-50 to-white flex items-center justify-center p-4">
       <div className="absolute top-6 right-6 flex items-center gap-2">
         <LanguageToggle />
         <ThemeToggle />
       </div>
       <div className="w-full max-w-md">
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-2xl shadow-blue-500/10 p-8 border border-gray-700 hover:border-blue-500 transition-colors">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
+        <div className="bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 from-white to-gray-50 rounded-2xl shadow-2xl dark:shadow-blue-500/10 light:shadow-gray-400/20 p-8 border dark:border-gray-700 light:border-gray-200 hover:border-blue-500 dark:hover:border-blue-500 light:hover:border-blue-400 transition-colors">
+          <h1 className="text-3xl font-bold bg-gradient-to-r dark:from-blue-400 dark:to-purple-400 from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Filmlerim.iO
           </h1>
-          <p className="text-gray-400 mb-8 font-light">{t('auth.login')}</p>
+          <p className="text-gray-400 dark:text-gray-400 light:text-gray-700 mb-8 font-light">{t('auth.login')}</p>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-gray-300 text-sm font-medium mb-2">
+              <label className="block text-gray-300 dark:text-gray-300 light:text-gray-700 text-sm font-medium mb-2">
                 {t('auth.email')}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2 bg-gray-700/50 dark:bg-gray-700/50 light:bg-gray-100 border border-gray-600 dark:border-gray-600 light:border-gray-300 rounded-lg text-white dark:text-white light:text-gray-900 placeholder-gray-500 dark:placeholder-gray-500 light:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 placeholder="example@email.com"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-gray-300 text-sm font-medium mb-2">
+              <label className="block text-gray-300 dark:text-gray-300 light:text-gray-700 text-sm font-medium mb-2">
                 {t('auth.password')}
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-2 bg-gray-700/50 dark:bg-gray-700/50 light:bg-gray-100 border border-gray-600 dark:border-gray-600 light:border-gray-300 rounded-lg text-white dark:text-white light:text-gray-900 placeholder-gray-500 dark:placeholder-gray-500 light:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                 placeholder="••••••••"
                 required
               />
             </div>
 
             {error && (
-              <div className="animate-slide-in bg-red-500/15 border-l-4 border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
+              <div className="animate-slide-in bg-red-500/15 dark:bg-red-500/15 light:bg-red-100 border-l-4 border-red-500 dark:border-red-500 light:border-red-400 text-red-400 dark:text-red-400 light:text-red-700 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
                 <span className="text-lg">⚠️</span>
                 <div>
                   <p className="font-semibold">{t('auth.error')}</p>
@@ -121,13 +121,13 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 disabled:from-gray-600 disabled:to-gray-600 text-white font-semibold py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="w-full bg-gradient-to-r dark:from-blue-600 dark:to-blue-700 light:from-blue-500 light:to-blue-600 dark:hover:from-blue-500 dark:hover:to-blue-600 light:hover:from-blue-400 light:hover:to-blue-500 disabled:from-gray-600 disabled:to-gray-600 text-white dark:text-white light:text-white font-semibold py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg"
             >
               {loading ? t('auth.loggingIn') : t('auth.login')}
             </button>
           </form>
 
-          <p className="text-center text-gray-400 text-sm mt-6">
+          <p className="text-center text-gray-400 dark:text-gray-400 light:text-gray-700 text-sm mt-6">
             {t('auth.noAccount')}{' '}
             <a href="/signup" className="text-blue-400 hover:text-blue-300 font-semibold transition-colors">
               {t('auth.signup')}
