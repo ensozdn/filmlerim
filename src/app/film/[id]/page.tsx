@@ -510,14 +510,14 @@ export default function FilmDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0e27]">
-        <div className="h-20 border-b border-white/5 bg-[#0a0e27]/80 backdrop-blur-xl"></div>
+      <div className="min-h-screen bg-[#0a0e27] dark:bg-[#0a0e27] light:bg-white">
+        <div className="h-20 border-b border-white/5 dark:border-white/5 light:border-gray-200 bg-[#0a0e27]/80 dark:bg-[#0a0e27]/80 light:bg-white/80 backdrop-blur-xl"></div>
         <main className="max-w-7xl mx-auto p-6">
-          <div className="bg-white/5 rounded-2xl p-8 border border-white/5 mb-8">
+          <div className="bg-white/5 dark:bg-white/5 light:bg-gray-100 rounded-2xl p-8 border border-white/5 dark:border-white/5 light:border-gray-200 mb-8">
             <div className="flex gap-8">
-              <div className="skeleton w-48 h-64 bg-white/5 rounded-xl"></div>
+              <div className="skeleton w-48 h-64 bg-white/5 dark:bg-white/5 light:bg-gray-200 rounded-xl"></div>
               <div className="flex-1 space-y-4">
-                <div className="skeleton w-3/4 h-10 bg-white/5 rounded"></div>
+                <div className="skeleton w-3/4 h-10 bg-white/5 dark:bg-white/5 light:bg-gray-200 rounded"></div>
                 <div className="skeleton w-1/2 h-8 bg-white/5 rounded"></div>
                 <div className="skeleton w-full h-20 bg-white/5 rounded"></div>
                 <div className="skeleton w-32 h-10 bg-white/5 rounded"></div>
@@ -531,19 +531,19 @@ export default function FilmDetailPage() {
 
   if (!film) {
     return (
-      <div className="min-h-screen bg-[#0a0e27] flex items-center justify-center">
-        <p className="text-white text-lg">Film bulunamadı</p>
+      <div className="min-h-screen bg-[#0a0e27] dark:bg-[#0a0e27] light:bg-white flex items-center justify-center">
+        <p className="text-white dark:text-white light:text-gray-900 text-lg">Film bulunamadı</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0e27] text-white">
+    <div className="min-h-screen bg-[#0a0e27] dark:bg-[#0a0e27] light:bg-white text-white dark:text-white light:text-gray-900">
       <DashboardHeader userEmail={user?.email} isAdmin={isAdmin} />
 
       <main className="max-w-7xl mx-auto p-4 md:p-6">
         {/* Film Info */}
-        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl md:rounded-2xl p-4 md:p-8 border border-gray-700 mb-6 md:mb-8 shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 transition-all">
+        <div className="bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 from-gray-200 to-gray-300 rounded-xl md:rounded-2xl p-4 md:p-8 border dark:border-gray-700 light:border-gray-400 mb-6 md:mb-8 shadow-xl hover:shadow-2xl hover:shadow-blue-500/10 transition-all">
           <div className="flex flex-col md:flex-row gap-4 md:gap-8">
             {film.poster_url && (
               <img

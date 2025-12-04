@@ -7,7 +7,11 @@
   --font-mono: var(--font-geist-mono);
 }
 
-/* Dark Mode (Default) */
+/* ============ DARK MODE (Default) ============ */
+html {
+  color-scheme: dark;
+}
+
 body {
   background: #0a0e27;
   color: #f8fafc;
@@ -16,25 +20,34 @@ body {
   min-height: 100vh;
 }
 
-/* Light Mode */
+/* ============ LIGHT MODE ============ */
+html.light-mode {
+  color-scheme: light;
+}
+
 html.light-mode body {
   background: #f8fafc;
   color: #0f172a;
 }
 
-/* Light mode overrides for backgrounds */
-html.light-mode [class*="bg-[#0a0e27]"],
-html.light-mode [class*="bg-gray-900"] {
+/* Light mode: Global backgrounds */
+html.light-mode {
+  background: #f8fafc;
+}
+
+html.light-mode body,
+html.light-mode [class*="min-h-screen"] {
   background-color: #f8fafc !important;
 }
 
-html.light-mode [class*="bg-[#1a1f35]"] {
+/* Light mode: Card and container backgrounds */
+html.light-mode [class*="bg-\[#0a0e27\]"],
+html.light-mode [class*="bg-\[#1a1f35\]"],
+html.light-mode .bg-gray-900,
+html.light-mode .bg-gray-800,
+html.light-mode [class*="dark\:bg-gray-900"] {
   background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-}
-
-html.light-mode .bg-gray-800 {
-  background-color: #ffffff !important;
+  color: #0f172a !important;
 }
 
 html.light-mode .bg-gray-700 {
@@ -45,28 +58,31 @@ html.light-mode .bg-gray-600 {
   background-color: #e2e8f0 !important;
 }
 
-/* Light mode overrides for text */
-html.light-mode .text-white {
+/* Light mode: Text colors - highest priority */
+html.light-mode .text-white,
+html.light-mode .text-slate-50 {
   color: #0f172a !important;
 }
 
-html.light-mode .text-gray-100 {
+html.light-mode .text-gray-100,
+html.light-mode .text-slate-100 {
   color: #1e293b !important;
 }
 
-html.light-mode .text-gray-200 {
+html.light-mode .text-gray-200,
+html.light-mode .text-slate-200 {
   color: #334155 !important;
 }
 
-html.light-mode .text-gray-300 {
+html.light-mode .text-gray-300,
+html.light-mode .text-slate-300 {
   color: #475569 !important;
 }
 
-html.light-mode .text-gray-400 {
-  color: #64748b !important;
-}
-
-html.light-mode .text-gray-500 {
+html.light-mode .text-gray-400,
+html.light-mode .text-slate-400,
+html.light-mode .text-gray-500,
+html.light-mode .text-slate-500 {
   color: #64748b !important;
 }
 
@@ -74,30 +90,71 @@ html.light-mode .text-gray-600 {
   color: #475569 !important;
 }
 
-/* Light mode overrides for borders */
+/* Light mode: Borders */
+html.light-mode [class*="border-white"],
 html.light-mode .border-white\/5,
-html.light-mode .border-white\/10 {
+html.light-mode .border-white\/10,
+html.light-mode .border-white\/20 {
   border-color: #e2e8f0 !important;
 }
 
 html.light-mode .border-gray-700,
-html.light-mode .border-gray-600 {
-  border-color: #e2e8f0 !important;
+html.light-mode .border-gray-600,
+html.light-mode .border-gray-500 {
+  border-color: #cbd5e1 !important;
 }
 
-/* Light mode shadows */
+/* Light mode: Overlay gradients */
+html.light-mode [class*="bg-gradient-to-t"],
+html.light-mode [class*="bg-gradient-to-b"],
+html.light-mode [class*="bg-gradient-to-r"],
+html.light-mode [class*="bg-gradient-to-l"],
+html.light-mode [class*="bg-gradient-to-br"] {
+  filter: brightness(1.1);
+}
+
+/* Light mode: From/via/to gradient stops */
+html.light-mode .from-\[\#1a1f35\],
+html.light-mode .via-\[\#1a1f35\],
+html.light-mode .to-\[\#1a1f35\] {
+  --tw-gradient-from: #e8eef2 var(--tw-gradient-stops) !important;
+  --tw-gradient-to: #ffffff var(--tw-gradient-stops) !important;
+  --tw-gradient-via: #f1f5f9 var(--tw-gradient-stops) !important;
+}
+
+html.light-mode .from-transparent,
+html.light-mode .via-transparent,
+html.light-mode .to-transparent {
+  --tw-gradient-from: rgba(255, 255, 255, 0.9) var(--tw-gradient-stops) !important;
+  --tw-gradient-via: rgba(255, 255, 255, 0.5) var(--tw-gradient-stops) !important;
+  --tw-gradient-to: transparent !important;
+}
+
+/* Light mode: Shadows */
 html.light-mode .shadow-xl,
-html.light-mode .shadow-2xl {
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
-}
-
-/* Light mode backdrop blur */
-html.light-mode .backdrop-blur-xl {
-  background-color: rgba(248, 250, 252, 0.8) !important;
-}
-
+html.light-mode .shadow-2xl,
 html.light-mode .shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Light mode: Backdrop blur */
+html.light-mode [class*="backdrop-blur"] {
+  background-color: rgba(248, 250, 252, 0.85) !important;
+}
+
+/* Light mode: Specific component backgrounds */
+html.light-mode [class*="bg-blue-600"],
+html.light-mode [class*="bg-blue-500"] {
+  background-color: #3b82f6;
+}
+
+html.light-mode [class*="hover:bg-blue"] {
+  background-color: #dbeafe;
+}
+
+html.light-mode .bg-white\/5,
+html.light-mode .bg-white\/10 {
+  background-color: rgba(248, 250, 252, 0.5) !important;
 }
 
 /* Smooth scrollbar - Dark Mode */

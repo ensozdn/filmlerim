@@ -43,27 +43,27 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
     const showSearchDropdown = searchDropdownOpen && searchResults.length > 0;
 
     return (
-        <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#0a0e27]/80 border-b border-white/5 shadow-2xl transition-all duration-300">
+        <header className="sticky top-0 z-50 backdrop-blur-xl bg-[#0a0e27]/80 dark:bg-[#0a0e27]/80 light:bg-white/90 border-b border-white/5 dark:border-white/5 light:border-gray-200 shadow-2xl transition-all duration-300">
             <div className="max-w-7xl mx-auto flex justify-between items-center p-4">
                 <div className="flex items-center gap-3 group cursor-pointer" onClick={() => router.push('/dashboard')}>
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform duration-300">
                         <span className="text-white font-bold text-lg">F</span>
                     </div>
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent group-hover:text-white transition-colors">
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-white via-gray-200 to-gray-400 dark:from-white dark:via-gray-200 dark:to-gray-400 light:from-gray-900 light:via-gray-700 light:to-gray-600 bg-clip-text text-transparent group-hover:text-white dark:group-hover:text-white light:group-hover:text-gray-900 transition-colors">
                         Filmlerim
                     </h1>
                 </div>
 
                 {/* Desktop Navigation */}
                 <nav className="hidden md:flex items-center gap-6 ml-8 mr-auto">
-                    <a href="/dashboard" className="text-white font-medium hover:text-gray-300 transition-colors">{t('nav.home')}</a>
-                    <a href="#trending" onClick={(e) => { e.preventDefault(); document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-300 font-medium hover:text-white transition-colors">{t('nav.trending')}</a>
+                    <a href="/dashboard" className="text-white dark:text-white light:text-gray-900 font-medium hover:text-gray-300 dark:hover:text-gray-300 light:hover:text-gray-700 transition-colors">{t('nav.home')}</a>
+                    <a href="#trending" onClick={(e) => { e.preventDefault(); document.querySelector('.trending-section')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-300 dark:text-gray-300 light:text-gray-700 font-medium hover:text-white dark:hover:text-white light:hover:text-gray-900 transition-colors">{t('nav.trending')}</a>
 
                     {/* Genres Dropdown */}
                     <div className="relative">
                         <button
                             onClick={() => setGenreDropdownOpen(!genreDropdownOpen)}
-                            className="text-gray-300 font-medium hover:text-white transition-colors flex items-center gap-1"
+                            className="text-gray-300 dark:text-gray-300 light:text-gray-700 font-medium hover:text-white dark:hover:text-white light:hover:text-gray-900 transition-colors flex items-center gap-1"
                         >
                             {t('nav.genres')}
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -72,7 +72,7 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
                         </button>
 
                         {genreDropdownOpen && (
-                            <div className="absolute top-full left-0 mt-2 w-48 bg-[#1a1f35] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-50">
+                            <div className="absolute top-full left-0 mt-2 w-48 bg-[#1a1f35] dark:bg-[#1a1f35] light:bg-white border border-white/10 dark:border-white/10 light:border-gray-200 rounded-xl shadow-2xl overflow-hidden z-50">
                                 {['action', 'adventure', 'animation', 'comedy', 'crime', 'documentary', 'drama', 'family', 'fantasy', 'history', 'horror', 'music', 'mystery', 'romance', 'scifi', 'thriller', 'war', 'western'].map((genreKey) => (
                                     <button
                                         key={genreKey}
@@ -80,7 +80,7 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
                                             onGenreSelect?.(t(`genre.${genreKey}`));
                                             setGenreDropdownOpen(false);
                                         }}
-                                        className="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                                        className="block w-full text-left px-4 py-2 text-sm text-gray-300 dark:text-gray-300 light:text-gray-700 hover:bg-white/5 dark:hover:bg-white/5 light:hover:bg-gray-100 hover:text-white dark:hover:text-white light:hover:text-gray-900 transition-colors"
                                     >
                                         {t(`genre.${genreKey}`)}
                                     </button>
@@ -104,7 +104,7 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
                                     setSearchDropdownOpen(true);
                                 }}
                                 onFocus={() => setSearchDropdownOpen(true)}
-                                className="w-64 px-4 py-1.5 pl-10 pr-8 bg-white/5 border border-white/10 rounded-full text-sm text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all group-hover:bg-white/10"
+                                className="w-64 px-4 py-1.5 pl-10 pr-8 bg-white/5 dark:bg-white/5 light:bg-gray-100 border border-white/10 dark:border-white/10 light:border-gray-300 rounded-full text-sm text-white dark:text-white light:text-gray-900 placeholder-gray-500 dark:placeholder-gray-500 light:placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent transition-all group-hover:bg-white/10 dark:group-hover:bg-white/10 light:group-hover:bg-gray-200"
                             />
                             <svg className="w-4 h-4 text-gray-500 absolute left-3.5 top-1/2 -translate-y-1/2 group-hover:text-blue-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />

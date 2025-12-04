@@ -73,10 +73,10 @@ export default function WatchlistPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-[#0a0e27]">
-                <div className="h-20 border-b border-white/5 bg-[#0a0e27]/80 backdrop-blur-xl"></div>
+            <div className="min-h-screen bg-[#0a0e27] dark:bg-[#0a0e27] light:bg-white">
+                <div className="h-20 border-b border-white/5 dark:border-white/5 light:border-gray-200 bg-[#0a0e27]/80 dark:bg-[#0a0e27]/80 light:bg-white/80 backdrop-blur-xl"></div>
                 <main className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
-                    <div className="h-8 bg-gray-700/50 rounded w-48 mb-6 md:mb-8 animate-pulse"></div>
+                    <div className="h-8 bg-gray-700/50 dark:bg-gray-700/50 light:bg-gray-300 rounded w-48 mb-6 md:mb-8 animate-pulse"></div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
                         {[...Array(10)].map((_, i) => (
                             <SkeletonCard key={i} />
@@ -88,13 +88,13 @@ export default function WatchlistPage() {
     }
 
     return (
-        <div className="min-h-screen bg-[#0a0e27] text-white">
+        <div className="min-h-screen bg-[#0a0e27] dark:bg-[#0a0e27] light:bg-white text-white dark:text-white light:text-gray-900">
             <DashboardHeader userEmail={user?.email} isAdmin={isAdmin} />
 
             <main className="max-w-7xl mx-auto p-6 lg:p-8 space-y-8">
                 {/* Header */}
                 <section>
-                    <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-2">
+                    <h1 className="text-3xl font-bold text-white dark:text-white light:text-gray-900 mb-2 flex items-center gap-2">
                         <span className="w-1 h-8 bg-blue-500 rounded-full"></span>
                         {t('watchlist.title')}
                     </h1>

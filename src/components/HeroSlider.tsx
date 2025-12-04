@@ -109,8 +109,8 @@ export default function HeroSlider({ films }: HeroSliderProps) {
                     <div className="w-full h-full bg-gray-900" />
                 )}
                 {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-[#0a0e27] via-[#0a0e27]/60 to-transparent"></div>
-                <div className="absolute inset-0 bg-gradient-to-t from-[#0a0e27] via-[#0a0e27]/40 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-r dark:from-[#0a0e27] dark:via-[#0a0e27]/60 from-black/40 via-black/20 to-transparent"></div>
+                <div className="absolute inset-0 bg-gradient-to-t dark:from-[#0a0e27] dark:via-[#0a0e27]/40 from-black/50 via-black/20 to-transparent"></div>
             </div>
 
             {/* Content */}
@@ -137,7 +137,7 @@ export default function HeroSlider({ films }: HeroSliderProps) {
                     <div className="flex flex-col sm:flex-row gap-3 md:gap-4 pt-2 md:pt-4">
                         <button
                             onClick={() => fetchTrailer(currentFilm.title)}
-                            className="px-6 md:px-8 py-3 md:py-3.5 bg-white text-black rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-200 transition-all transform hover:scale-105 shadow-lg shadow-white/10 text-sm md:text-base"
+                            className="px-6 md:px-8 py-3 md:py-3.5 bg-white dark:bg-white text-black dark:text-black rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-200 transition-all transform hover:scale-105 shadow-lg shadow-white/10 text-sm md:text-base"
                         >
                             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z" />
@@ -147,7 +147,7 @@ export default function HeroSlider({ films }: HeroSliderProps) {
 
                         <button
                             onClick={() => router.push(`/film/${currentFilm.id}`)}
-                            className="px-6 md:px-8 py-3 md:py-3.5 bg-gray-600/40 backdrop-blur-md text-white border border-white/20 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-gray-600/60 transition-all transform hover:scale-105 text-sm md:text-base"
+                            className="px-6 md:px-8 py-3 md:py-3.5 bg-white/10 dark:bg-gray-600/40 backdrop-blur-md text-white dark:text-white border border-white/20 dark:border-white/20 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-white/20 dark:hover:bg-gray-600/60 transition-all transform hover:scale-105 text-sm md:text-base"
                         >
                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

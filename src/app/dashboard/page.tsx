@@ -140,10 +140,10 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0a0e27]">
-        <div className="h-20 border-b border-white/5 bg-[#0a0e27]/80 backdrop-blur-xl"></div>
+      <div className="min-h-screen bg-[#0a0e27] dark:bg-[#0a0e27] light:bg-white">
+        <div className="h-20 border-b border-white/5 dark:border-white/5 light:border-gray-200 bg-[#0a0e27]/80 dark:bg-[#0a0e27]/80 light:bg-white/80 backdrop-blur-xl"></div>
         {/* Hero Slider Skeleton */}
-        <div className="h-[50vh] md:h-[60vh] lg:h-[70vh] bg-gradient-to-br from-gray-800/30 to-gray-900/30 animate-pulse"></div>
+        <div className="h-[50vh] md:h-[60vh] lg:h-[70vh] bg-gradient-to-br dark:from-gray-800/30 dark:to-gray-900/30 from-gray-300/30 to-gray-400/30 animate-pulse"></div>
         
         <main className="max-w-7xl mx-auto p-4 md:p-6">
           {/* Stats Skeleton */}
@@ -182,7 +182,7 @@ export default function DashboardPage() {
   const trendingFilms = [...films].sort(() => 0.5 - Math.random()).slice(0, 10);
 
   return (
-    <div className="min-h-screen bg-[#0a0e27] text-white selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#0a0e27] dark:bg-[#0a0e27] light:bg-white text-white dark:text-white light:text-gray-900 selection:bg-blue-500/30">
       <DashboardHeader
         userEmail={user?.email}
         isAdmin={isAdmin}
@@ -205,13 +205,13 @@ export default function DashboardPage() {
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
-          <div className="bg-[#1a1f35] p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+          <div className="bg-[#1a1f35] dark:bg-[#1a1f35] light:bg-white p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 dark:border-white/5 light:border-gray-200 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
             <div className="absolute top-0 right-0 p-2 md:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <span className="text-4xl md:text-6xl">🎬</span>
             </div>
-            <h3 className="text-gray-400 text-xs md:text-sm font-medium mb-1">{t('dashboard.totalFilms')}</h3>
-            <p className="text-2xl md:text-3xl font-bold text-white">{films.length}</p>
-            <div className="mt-2 md:mt-4 flex items-center text-xs text-green-400">
+            <h3 className="text-gray-400 dark:text-gray-400 light:text-gray-600 text-xs md:text-sm font-medium mb-1">{t('dashboard.totalFilms')}</h3>
+            <p className="text-2xl md:text-3xl font-bold text-white dark:text-white light:text-gray-900">{films.length}</p>
+            <div className="mt-2 md:mt-4 flex items-center text-xs text-green-400 dark:text-green-400 light:text-green-600">
               <span className="flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -221,15 +221,15 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-[#1a1f35] p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+          <div className="bg-[#1a1f35] dark:bg-[#1a1f35] light:bg-white p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 dark:border-white/5 light:border-gray-200 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
             <div className="absolute top-0 right-0 p-2 md:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <span className="text-4xl md:text-6xl">💬</span>
             </div>
-            <h3 className="text-gray-400 text-xs md:text-sm font-medium mb-1">{t('dashboard.totalComments')}</h3>
-            <p className="text-2xl md:text-3xl font-bold text-white">
+            <h3 className="text-gray-400 dark:text-gray-400 light:text-gray-600 text-xs md:text-sm font-medium mb-1">{t('dashboard.totalComments')}</h3>
+            <p className="text-2xl md:text-3xl font-bold text-white dark:text-white light:text-gray-900">
               {films.reduce((acc, film: any) => acc + (film.comment_count || 0), 0)}
             </p>
-            <div className="mt-2 md:mt-4 flex items-center text-xs text-blue-400">
+            <div className="mt-2 md:mt-4 flex items-center text-xs text-blue-400 dark:text-blue-400 light:text-blue-600">
               <span className="flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
@@ -239,15 +239,15 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-[#1a1f35] p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+          <div className="bg-[#1a1f35] dark:bg-[#1a1f35] light:bg-white p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 dark:border-white/5 light:border-gray-200 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
             <div className="absolute top-0 right-0 p-2 md:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <span className="text-4xl md:text-6xl">⭐</span>
             </div>
-            <h3 className="text-gray-400 text-xs md:text-sm font-medium mb-1">{t('dashboard.avgRating')}</h3>
-            <p className="text-2xl md:text-3xl font-bold text-white">
+            <h3 className="text-gray-400 dark:text-gray-400 light:text-gray-600 text-xs md:text-sm font-medium mb-1">{t('dashboard.avgRating')}</h3>
+            <p className="text-2xl md:text-3xl font-bold text-white dark:text-white light:text-gray-900">
               {(films.reduce((acc, film: any) => acc + (film.average_rating || 0), 0) / (films.length || 1)).toFixed(1)}
             </p>
-            <div className="mt-2 md:mt-4 flex items-center text-xs text-yellow-400">
+            <div className="mt-2 md:mt-4 flex items-center text-xs text-yellow-400 dark:text-yellow-400 light:text-yellow-600">
               <span className="flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
@@ -257,12 +257,12 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <div className="bg-[#1a1f35] p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
+          <div className="bg-[#1a1f35] dark:bg-[#1a1f35] light:bg-white p-4 md:p-6 rounded-xl md:rounded-2xl border border-white/5 dark:border-white/5 light:border-gray-200 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
             <div className="absolute top-0 right-0 p-2 md:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <span className="text-4xl md:text-6xl">🎭</span>
             </div>
-            <h3 className="text-gray-400 text-xs md:text-sm font-medium mb-1">{t('dashboard.topGenre')}</h3>
-            <p className="text-2xl md:text-3xl font-bold text-white truncate">
+            <h3 className="text-gray-400 dark:text-gray-400 light:text-gray-600 text-xs md:text-sm font-medium mb-1">{t('dashboard.topGenre')}</h3>
+            <p className="text-2xl md:text-3xl font-bold text-white dark:text-white light:text-gray-900 truncate">
               {(() => {
                 const genreCounts: Record<string, number> = {};
                 films.forEach((film: any) => {
@@ -274,7 +274,7 @@ export default function DashboardPage() {
                 return topGenre ? topGenre[0] : '-';
               })()}
             </p>
-            <div className="mt-2 md:mt-4 flex items-center text-xs text-purple-400">
+            <div className="mt-2 md:mt-4 flex items-center text-xs text-purple-400 dark:text-purple-400 light:text-purple-600">
               <span className="flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />

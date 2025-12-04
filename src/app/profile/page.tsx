@@ -181,12 +181,12 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0e27] text-white">
+    <div className="min-h-screen bg-[#0a0e27] dark:bg-[#0a0e27] light:bg-white text-white dark:text-white light:text-gray-900">
       <DashboardHeader userEmail={user?.email} isAdmin={isAdmin} />
 
       <main className="max-w-7xl mx-auto p-6 lg:p-8 space-y-12">
         {/* Profile Header */}
-        <section className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-8 border border-white/10">
+        <section className="bg-gradient-to-br dark:from-gray-800/50 dark:to-gray-900/50 from-gray-100 to-gray-200 rounded-2xl p-8 border border-white/10 dark:border-white/10 light:border-gray-300">
           <div className="flex items-center gap-6">
             {/* Avatar */}
             <div className="w-24 h-24 bg-gradient-to-br from-blue-600 to-purple-600 rounded-full flex items-center justify-center text-4xl font-bold shadow-lg shadow-blue-500/20">
@@ -203,16 +203,16 @@ export default function ProfilePage() {
 
             {/* User Info */}
             <div className="flex-1">
-              <h1 className="text-3xl font-bold text-white mb-2">
+              <h1 className="text-3xl font-bold text-white dark:text-white light:text-gray-900 mb-2">
                 {user?.email}
               </h1>
               {profile?.bio && (
-                <p className="text-gray-400 text-sm">{profile.bio}</p>
+                <p className="text-gray-400 dark:text-gray-400 light:text-gray-700 text-sm">{profile.bio}</p>
               )}
               <div className="flex gap-4 mt-3">
                 <div className="text-sm">
-                  <span className="text-gray-500">{t('profile.membership')} </span>
-                  <span className="text-gray-300">
+                  <span className="text-gray-500 dark:text-gray-500 light:text-gray-700">{t('profile.membership')} </span>
+                  <span className="text-gray-300 dark:text-gray-300 light:text-gray-600">
                     {new Date(user?.created_at).toLocaleDateString('tr-TR')}
                   </span>
                 </div>
@@ -223,38 +223,38 @@ export default function ProfilePage() {
 
         {/* Stats */}
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-gradient-to-br from-blue-600/20 to-blue-800/20 rounded-2xl p-6 border border-blue-500/30">
+          <div className="bg-gradient-to-br dark:from-blue-600/20 dark:to-blue-800/20 from-blue-100 to-blue-200 rounded-2xl p-6 border dark:border-blue-500/30 light:border-blue-300">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 dark:bg-blue-500/20 light:bg-blue-200 rounded-full flex items-center justify-center">
                 <span className="text-2xl">❤️</span>
               </div>
               <div>
-                <p className="text-blue-300 text-sm font-medium">{t('profile.favorites')}</p>
-                <p className="text-3xl font-bold text-white">{stats.totalFavorites}</p>
+                <p className="text-blue-300 dark:text-blue-300 light:text-blue-700 text-sm font-medium">{t('profile.favorites')}</p>
+                <p className="text-3xl font-bold text-white dark:text-white light:text-gray-900">{stats.totalFavorites}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-purple-600/20 to-purple-800/20 rounded-2xl p-6 border border-purple-500/30">
+          <div className="bg-gradient-to-br dark:from-purple-600/20 dark:to-purple-800/20 from-purple-100 to-purple-200 rounded-2xl p-6 border dark:border-purple-500/30 light:border-purple-300">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 dark:bg-purple-500/20 light:bg-purple-200 rounded-full flex items-center justify-center">
                 <span className="text-2xl">💬</span>
               </div>
               <div>
-                <p className="text-purple-300 text-sm font-medium">{t('profile.comments')}</p>
-                <p className="text-3xl font-bold text-white">{stats.totalComments}</p>
+                <p className="text-purple-300 dark:text-purple-300 light:text-purple-700 text-sm font-medium">{t('profile.comments')}</p>
+                <p className="text-3xl font-bold text-white dark:text-white light:text-gray-900">{stats.totalComments}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-600/20 to-yellow-800/20 rounded-2xl p-6 border border-yellow-500/30">
+          <div className="bg-gradient-to-br dark:from-yellow-600/20 dark:to-yellow-800/20 from-yellow-100 to-yellow-200 rounded-2xl p-6 border dark:border-yellow-500/30 light:border-yellow-300">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 dark:bg-yellow-500/20 light:bg-yellow-200 rounded-full flex items-center justify-center">
                 <span className="text-2xl">⭐</span>
               </div>
               <div>
-                <p className="text-yellow-300 text-sm font-medium">{t('profile.avgRating')}</p>
-                <p className="text-3xl font-bold text-white">
+                <p className="text-yellow-300 dark:text-yellow-300 light:text-yellow-700 text-sm font-medium">{t('profile.avgRating')}</p>
+                <p className="text-3xl font-bold text-white dark:text-white light:text-gray-900">
                   {stats.averageRating > 0 ? stats.averageRating : '-'}
                 </p>
               </div>
@@ -265,8 +265,8 @@ export default function ProfilePage() {
         {/* Charts Section */}
         <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Genre Distribution */}
-          <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-6 border border-white/10">
-            <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+          <div className="bg-gradient-to-br dark:from-gray-800/50 dark:to-gray-900/50 from-gray-100 to-gray-200 rounded-2xl p-6 border border-white/10 dark:border-white/10 light:border-gray-300">
+            <h3 className="text-xl font-bold text-white dark:text-white light:text-gray-900 mb-6 flex items-center gap-2">
               <span className="w-1 h-5 bg-green-500 rounded-full"></span>
               Favori Türler
             </h3>
