@@ -31,7 +31,7 @@ export default function DashboardHeader({ userEmail, isAdmin, onSearch, searchQu
 
     const handleLogout = async () => {
         await supabase.auth.signOut();
-        router.push('/login');
+        router.push('/');
     };
 
     // Filter films for autocomplete
