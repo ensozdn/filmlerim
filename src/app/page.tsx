@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
+import LanguageToggle from '@/components/LanguageToggle';
 
 export default function Home() {
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function Home() {
           </span>
         </div>
         <div className="flex items-center gap-4">
+          <LanguageToggle />
           <a href="/login" className="text-sm font-medium text-gray-300 hover:text-white transition-colors">
             {t('auth.login')}
           </a>
