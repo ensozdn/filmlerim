@@ -59,7 +59,7 @@ export default function StarRating({ rating, onRatingChange, size = 'md' }: Star
           )}
         </button>
       ))}
-      <span className="ml-2 text-lg font-bold text-yellow-400">
+      <span className="ml-2 text-lg font-bold text-yellow-400 dark:text-yellow-400 light:text-yellow-600">
         {currentRating}/5
       </span>
     </div>

@@ -330,8 +330,8 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-        <header className="bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700 p-6 shadow-xl">
+      <div className="min-h-screen bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-black from-gray-100 via-gray-50 to-white">
+        <header className="bg-gradient-to-r dark:from-gray-900 dark:to-gray-800 from-white to-gray-100 border-b border-gray-700 dark:border-gray-700 light:border-gray-300 p-6 shadow-xl">
           <div className="max-w-7xl mx-auto flex justify-between items-center">
             <div className="skeleton w-48 h-10"></div>
             <div className="flex gap-4">
@@ -343,7 +343,7 @@ export default function AdminPage() {
         <main className="max-w-7xl mx-auto p-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-1">
-              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 space-y-4">
+              <div className="bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 from-white to-gray-50 rounded-2xl p-6 border dark:border-gray-700 light:border-gray-200 space-y-4">
                 <div className="skeleton w-32 h-8"></div>
                 <div className="skeleton w-full h-10"></div>
                 <div className="skeleton w-full h-10"></div>
@@ -352,7 +352,7 @@ export default function AdminPage() {
               </div>
             </div>
             <div className="lg:col-span-2">
-              <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 space-y-3">
+              <div className="bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 from-white to-gray-50 rounded-2xl p-6 border dark:border-gray-700 light:border-gray-200 space-y-3">
                 <div className="skeleton w-32 h-8 mb-4"></div>
                 {[...Array(5)].map((_, i) => (
                   <div key={i} className="skeleton w-full h-20"></div>
@@ -366,18 +366,18 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="min-h-screen bg-gradient-to-br dark:from-gray-900 dark:via-gray-800 dark:to-black from-gray-100 via-gray-50 to-white">
       {/* Header */}
-      <header className="bg-gradient-to-r from-gray-900 to-gray-800 border-b border-gray-700 p-6 shadow-xl">
+      <header className="bg-gradient-to-r dark:from-gray-900 dark:to-gray-800 from-white to-gray-100 border-b border-gray-700 dark:border-gray-700 light:border-gray-300 p-6 shadow-xl">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r dark:from-purple-400 dark:to-pink-400 from-purple-600 to-pink-600 bg-clip-text text-transparent">
             ⚙️ Admin Paneli
           </h1>
           <div className="flex items-center gap-4">
             <button
               onClick={handleFetchPopularMovies}
               disabled={searchLoading}
-              className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-gradient-to-r dark:from-green-600 dark:to-green-700 light:from-green-500 light:to-green-600 dark:hover:from-green-500 dark:hover:to-green-600 light:hover:from-green-400 light:hover:to-green-500 text-white px-4 py-2 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
               title="TMDB'den popüler filmleri otomatik ekle"
             >
               {searchLoading ? '⏳ Yükleniyor...' : '🔥 Popüler Filmler'}
@@ -403,14 +403,14 @@ export default function AdminPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Form */}
           <div className="lg:col-span-1">
-            <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 shadow-xl hover:shadow-2xl hover:shadow-purple-500/10 transition-all">
-              <h2 className="text-2xl font-bold text-white mb-6">
+            <div className="bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 from-white to-gray-50 rounded-2xl p-6 border dark:border-gray-700 light:border-gray-200 shadow-xl hover:shadow-2xl hover:shadow-purple-500/10 transition-all">
+              <h2 className="text-2xl font-bold text-white dark:text-white light:text-gray-900 mb-6">
                 {editingId ? '✏️ Filmi Düzenle' : '➕ Yeni Film Ekle'}
               </h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                  <label className="block text-gray-300 dark:text-gray-300 light:text-gray-700 text-sm font-medium mb-2">
                     Başlık
                   </label>
                   <div className="flex gap-2">
@@ -418,14 +418,14 @@ export default function AdminPage() {
                       type="text"
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
-                      className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                      className="w-full px-4 py-2 bg-gray-700/50 dark:bg-gray-700/50 light:bg-gray-100 border border-gray-600 dark:border-gray-600 light:border-gray-300 rounded-lg text-white dark:text-white light:text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
                       placeholder="Film başlığı"
                     />
                     <button
                       type="button"
                       onClick={handleSearchFilm}
                       disabled={searchLoading}
-                      className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-2 rounded-lg transition-all disabled:opacity-50"
+                      className="bg-blue-600 dark:bg-blue-600 light:bg-blue-500 hover:bg-blue-500 dark:hover:bg-blue-500 light:hover:bg-blue-400 text-white px-3 py-2 rounded-lg transition-all disabled:opacity-50"
                       title="TMDB'den Bilgileri Çek"
                     >
                       {searchLoading ? '...' : '🔍'}
@@ -434,20 +434,20 @@ export default function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                  <label className="block text-gray-300 dark:text-gray-300 light:text-gray-700 text-sm font-medium mb-2">
                     Açıklama
                   </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    className="w-full px-4 py-2 bg-gray-700/50 border border-gray-600 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
+                    className="w-full px-4 py-2 bg-gray-700/50 dark:bg-gray-700/50 light:bg-gray-100 border border-gray-600 dark:border-gray-600 light:border-gray-300 rounded-lg text-white dark:text-white light:text-gray-900 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none"
                     placeholder="Film açıklaması"
                     rows={4}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
+                  <label className="block text-gray-300 dark:text-gray-300 light:text-gray-700 text-sm font-medium mb-2">
                     Poster URL
                   </label>
                   <input
