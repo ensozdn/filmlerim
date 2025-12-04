@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/context/LanguageContext';
 import DashboardHeader from '@/components/DashboardHeader';
 import FilmCard from '@/components/FilmCard';
+import SkeletonCard from '@/components/SkeletonCard';
 
 interface Film {
     id: number;
@@ -74,11 +75,11 @@ export default function WatchlistPage() {
         return (
             <div className="min-h-screen bg-[#0a0e27]">
                 <div className="h-20 border-b border-white/5 bg-[#0a0e27]/80 backdrop-blur-xl"></div>
-                <main className="max-w-7xl mx-auto p-6">
-                    <div className="skeleton w-48 h-8 mb-8 bg-white/5"></div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                <main className="max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+                    <div className="h-8 bg-gray-700/50 rounded w-48 mb-6 md:mb-8 animate-pulse"></div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
                         {[...Array(10)].map((_, i) => (
-                            <div key={i} className="skeleton h-80 bg-white/5 rounded-2xl"></div>
+                            <SkeletonCard key={i} />
                         ))}
                     </div>
                 </main>

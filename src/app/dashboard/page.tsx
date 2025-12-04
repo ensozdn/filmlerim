@@ -8,6 +8,7 @@ import ThemeToggle from '@/components/ThemeToggle';
 import HeroSlider from '@/components/HeroSlider';
 import FilmCarousel from '@/components/FilmCarousel';
 import FilmCard from '@/components/FilmCard';
+import SkeletonCard from '@/components/SkeletonCard';
 import { useLanguage } from '@/context/LanguageContext';
 
 interface Film {
@@ -141,12 +142,35 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen bg-[#0a0e27]">
         <div className="h-20 border-b border-white/5 bg-[#0a0e27]/80 backdrop-blur-xl"></div>
-        <div className="h-[60vh] bg-gray-800/20 animate-pulse"></div>
-        <main className="max-w-7xl mx-auto p-6">
-          <div className="skeleton w-48 h-8 mb-8 bg-white/5"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Hero Slider Skeleton */}
+        <div className="h-[50vh] md:h-[60vh] lg:h-[70vh] bg-gradient-to-br from-gray-800/30 to-gray-900/30 animate-pulse"></div>
+        
+        <main className="max-w-7xl mx-auto p-4 md:p-6">
+          {/* Stats Skeleton */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-8 md:mb-12">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="aspect-[2/3] rounded-2xl overflow-hidden skeleton bg-white/5"></div>
+              <div key={i} className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl md:rounded-2xl p-4 md:p-6 border border-white/5 animate-pulse">
+                <div className="h-4 bg-gray-700/50 rounded w-1/2 mb-3"></div>
+                <div className="h-8 bg-gray-700/50 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Trending Carousel Skeleton */}
+          <div className="mb-8 md:mb-12">
+            <div className="h-6 bg-gray-700/50 rounded w-32 mb-4 animate-pulse"></div>
+            <div className="flex gap-4 overflow-hidden">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="min-w-[200px] aspect-[2/3] bg-gray-800/50 rounded-xl animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+
+          {/* Films Grid Skeleton */}
+          <div className="h-6 bg-gray-700/50 rounded w-48 mb-6 animate-pulse"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+            {[...Array(8)].map((_, i) => (
+              <SkeletonCard key={i} />
             ))}
           </div>
         </main>
